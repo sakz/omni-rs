@@ -1,0 +1,40 @@
+[package]
+name = "omni-core"
+version.workspace = true
+edition.workspace = true
+
+[features]
+default = ["mimalloc"]
+mimalloc = ["dep:mimalloc"]
+
+[dependencies]
+omni-log = { workspace = true }
+omni-config = { workspace = true }
+omni-domain = { workspace = true }
+omni-limiter = { workspace = true }
+omni-mux = { workspace = true }
+omni-proto = { workspace = true }
+omni-transport = { workspace = true }
+omni-panel = { workspace = true }
+
+tokio = { workspace = true }
+futures-util = { workspace = true }
+bytes = { workspace = true }
+tracing = { workspace = true }
+dashmap = { workspace = true }
+rand = { workspace = true }
+instant-acme = { workspace = true, default-features = false, features = ["hyper-rustls", "ring"] }
+rcgen = { workspace = true }
+regex = { workspace = true }
+sha2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+base64 = { workspace = true }
+hickory-resolver = { workspace = true }
+rustls-pki-types = { workspace = true }
+tokio-rustls = { workspace = true }
+
+mimalloc = { version = "0.1", optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+io-uring = "0.7"

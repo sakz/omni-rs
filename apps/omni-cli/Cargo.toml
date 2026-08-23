@@ -1,0 +1,22 @@
+[package]
+name = "omni-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "omni-rs-bin"
+path = "src/main.rs"
+
+[features]
+default = ["mimalloc"]
+mimalloc = ["omni-core/mimalloc"]
+
+[dependencies]
+omni-core = { workspace = true }
+omni-config = { workspace = true }
+omni-log = { workspace = true }
+
+clap = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }

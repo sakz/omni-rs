@@ -1,0 +1,8 @@
+[package]
+name = "omni-limiter"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dashmap = { workspace = true }
+serde = { workspace = true }

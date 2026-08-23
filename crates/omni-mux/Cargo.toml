@@ -1,0 +1,16 @@
+[package]
+name = "omni-mux"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+bytes = { workspace = true }
+omni-domain = { workspace = true }
+tokio-util = { workspace = true }
+smux = { workspace = true }
+yamux = { workspace = true }
+futures-util = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

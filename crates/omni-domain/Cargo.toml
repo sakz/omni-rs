@@ -1,0 +1,9 @@
+[package]
+name = "omni-domain"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bytes = { workspace = true }
+regex = { workspace = true }
+tokio = { workspace = true }

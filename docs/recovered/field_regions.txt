@@ -1,0 +1,444 @@
+
+============================== ANCHOR: user_persist_path
+
+--- offset 2000821 ---
+main_routeshostscache_sizecache_ttl_secsblock_list_urlwhite_list_urlhosts_urlupdate_interval_secsapi_tokenapi_versionpull_interval_secspush_interval_secsdevice_online_min_traffic_kbtraffic_report_min_traffic_kbtokioepolliouringforbidden_timesync_interval_secspersist_enabledpersist_pathpersist_interval_secslisten_ipsend_ipacceptProxyProtocolenable_proxy_protocolacceptUdpProxyProtocolenable_udp_proxy_protocolshadowsocks_invalid_accessss_invalid_accesscert_configdefault_dnsConfigPathconfig_pathConfigUrlconfig_urlRouteOutboundsoutboundspolicybackendNtpntppanelNodesnodesExtraextraDnsmetrics_portgeouser_persist_pathdns_configrule_listaccess_logemaildns_envkey_pemskip_verifycongestion_controlmaxConcurrentStreamsmax_concurrent_streamsWsSpecH2Specservice_nameHttpupSpecXhttpSpecrejectrulesdefault_reject_reasondefault_throttle_msrate_limituser_bindinguploadmax_connectionsdirectory_urldns_mapcert_modereject_unknown_snicert_domaincert_filecert_contentkey_contentrealityuidcredentialtotal_pagestotal_countpausedzone_idzone_namecontentproxiedttlcommentserviceprotoerrorsresultresult_infookinvalid-token2fa-requirederrorMessagezonespageNumbertotalPagestotalZonesdnssecStatussoaSeriallastModifiedrecordsRecordrDatadata did not match any variant of untagged enum RecordDataaddedRecordcreated_atgradegrade_titleext_statusis_markremarkis_vipsearchengine_pushbeiancreated_onupdated_onownerdomain_totalall_totalmine_totalshare_totalvip_totalismark_totalpause_totalerror_totallock_totalspam_totalvip_expireshare_out_totalrecordrecord_countfailedrunningpaginationlast_pagetotal_entriesRecordCountDomainListDomainCountInfoRequestIdDomainTotalhijackdomain_suffixportsport_rangesdomain_keywordinbound_tagsdomain_regexresponse_b64response_base64disableKtlsdisable_ktlsforceKtlsforce_ktlsvless_flowmaxTimeDiffHttpPr
+--- offset 2037769 ---
+ss; domain names are not supported 
+ use an IP address (e.g. "8.8.8.8" or "8.8.8.8:53"). Skipping.dns.resolve: failed to parse server URIcert_mode=file requires cert_file and key_file paths`DateTime + TimeDelta` overflowedcert_mode=content requires cert_contentcert_mode=content requires key_contentcert_mode=self requires cert_domaincert.renew: self-signed cert expiring soon, regeneratingcert: failed to check self-signed expiry, regeneratingcert.generate: self-signedLocal time out of range for `NaiveDateTime``NaiveDate - TimeDelta` overflowed`NaiveDate + TimeDelta` overflowedno buffer space]:user_persist_path is a relative path; it will be resolved against the process working directoryprotocol cannot be emptymux is disabled but a mux kind is configuredexternal mux requires tcp-capable inbound networkmieru outbound requires non-empty 'username' and 'password'anytls outbound requires a non-empty 'password'shadowsocks outbound requires a non-empty 'password'shadowsocks outbound requires a non-empty 'method'vmess outbound requires a non-empty 'uuid'vless outbound requires a non-empty 'uuid'trojan outbound requires a non-empty 'password'outbound tag cannot be emptyduplicate tag (tags must be unique across inbounds and outbounds)empty transport capability setboth tcp and udp are disabledmissing caps() declarationruntime.backend: ignoring invalid omni_backend overrideenvinbound transport selectedinbound transport tls usageserviceNamexhttpModexhttp_modenode_builder: both disable_ktls and force_ktls are true; force_ktls is ignoredlimiter hijack reverse-proxy target is invalidOKNo ContentMoved PermanentlyFoundBad RequestUnauthorizedForbiddenNot FoundToo Many RequestsInternal Server ErrorConnection: close
+rejected by policy defaultdns.node: building node-local hickory resolver
+
+============================== ANCHOR: bind_addr
+
+--- offset 2077631 ---
+eUnknownRecordTypeStrUnknownRecordTypeValueUnrecognizedLabelCodeUnrecognizedNsec3FlagsUnrecognizedCsyncFlagsRequestRefusedTimerUrlParsingRustlsErrorQueryCaseMismatchStreamErrorRemoteTerminateConnectionErrorHeaderTooBigactual_sizeRemoteClosingUndefinedissuer_criticalraw_tagraw_valueConstructedNotConstructedMissingTimeZoneMissingSecondsUnusedBitsNotZeroInvalidBooleanIntegerEmptyIntegerLeadingZeroesPGPIPKIXISPKIACPKIXIACPKIXOIDExperimentalReadClientReadRemoteWriteClientWriteRemoteEventfdPollTlsRecvTlsSendTlsClientRecvTlsClientSendUdpRecvsocket_addrtls_dns_namehttp_endpointtrust_negative_responsesbind_addrEd25519Ed448name_labelsdns_classpolled MutexLockFuture after completionHttpsPkixTaPkixEeDaneTaDaneEeBerTypeErrorBerValueErrorInvalidValueUnknownTagUnexpectedTagUnexpectedClassIndefiniteLengthUnexpectedConstructExpectedConstructUnexpectedIntegerTooLargeIntegerNegativeBerMaxDepthStringInvalidCharsetInvalidDateTimeDerConstraintFailedLifetimeErrorIncompleteIssueIssueWildIodefRSAMD5DHECCRSASHA1PRIVATEDNSPRIVATEOIDDSANSEC3SHA1RSASHA256RSASHA512ECCGOSTECDSAP256SHA256ECDSAP384SHA384SM2SM3ECCGOST12ApiHyperInvalidUriStrForwardNSDataSwapSnapshotRestartNodeIssuerProtoErrorFailureMapResMapOptAltIsNotIsASeparatedListSeparatedNonEmptyListMany0Many1CountTakeUntilLengthValueTagClosureAlphaDigitAlphaNumericSpaceMultiSpaceLengthValueFnEofSwitchTagBitsOneOfNoneOfRegexpMatchRegexpMatchesRegexpFindRegexpCaptureRegexpCapturesTakeWhile1FixEscapedManyMNPermutationVerifyTakeTill1TakeWhileMNMany0CountMany1CountFloatSatisfyInvalidStreamIdExceededLimitNotPoppedInReverseOrderexpected_layoutactual_layoutNoAllocationsToPopInvalidRemoteAddressNoDefaultClientConfigcert_typekey_tagobfs_typeLLQULDAUDHUN3UExpireKeepaliveDuplicateSharedPointersvc_prioritytarget_namesvc_paramsRawSha256Sha512InvalidUriCharInvali
+
+============================== ANCHOR: hijack_rules
+
+--- offset 2059642 ---
+event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:347event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:364event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:245event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:365event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:372event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:390event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:400event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:550hijack_rulesevent crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:660event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:662event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:668event crates/omni-core/src/runtime/assembly/listener_stream_executor.rs:558event crates/omni-core/src/runtime/assembly/container.rs:306omni_core::runtime::assembly::containercrates/omni-core/src/runtime/assembly/container.rsevent crates/omni-core/src/runtime/assembly/container.rs:318event crates/omni-core/src/runtime/assembly/container.rs:190event crates/omni-core/src/runtime/assembly/container.rs:206event crates/omni-core/src/runtime/assembly/container.rs:198event crates/omni-core/src/dataplane/epoll/relay.rs:101omni_core::dataplane::epoll::relayprefix_lencrates/omni-core/src/dataplane/epoll/relay.rsevent crates/omni-core/src/dataplane/epoll/relay.rs:169in_fdout_fdevent crates/omni-core/src/dataplane/epoll/relay.rs:173down_bytesevent crates/omni-core/src/dataplane/epoll/relay.rs:136event crates/omni-core/src/dataplane/epoll/relay.rs:205client_fdevent crates/omni-core/src/dataplane/epoll/relay.rs:235event crates/omni-core/src/dataplane/epoll/relay.r
+
+============================== ANCHOR: omni_iouring_workers
+
+--- offset 2072167 ---
+ring/worker.rs:1334idle_secsevent crates/omni-core/src/dataplane/io_uring/worker.rs:1351event crates/omni-core/src/dataplane/io_uring/worker.rs:783event crates/omni-core/src/dataplane/io_uring/worker.rs:1443event crates/omni-core/src/dataplane/io_uring/worker.rs:2631buf_group_idevent crates/omni-core/src/dataplane/io_uring/worker.rs:2496errnoevent crates/omni-core/src/dataplane/io_uring/worker.rs:2223event crates/omni-core/src/dataplane/io_uring/worker.rs:2239cqe_flagsevent crates/omni-core/src/dataplane/io_uring/worker.rs:288omni_epoll_workersomni_epoll_max_conn_per_workeromni_epoll_queue_capomni_iouring_workersomni_iouring_max_connomni_iouring_ring_sizeomni_iouring_defer_taskrunomni_iouring_single_issueromni_iouring_coop_taskrunomni_iouring_taskrun_flagomni_iouring_no_iowaitomni_iouring_sq_pollomni_iouring_sq_poll_idle_msOMNI_IOURING_QUEUE_CAPomni_iouring_queueOMNI_IOURING_TCP_QUEUE_CAPomni_iouring_tcp_queueOMNI_IOURING_TLS_QUEUE_CAPomni_iouring_tls_queueOMNI_IOURING_TLS_CONNECT_QUEUE_CAPomni_iouring_tls_connect_queueOMNI_IOURING_UDP_QUEUE_CAPomni_iouring_udp_queuev6_prefixesv6_networksv4_prefixesv4_networkslast_modifiedsource_urlspansregex_patternsvariant identifierBoxStream does not return Noneerror code VarIntEOF while reading chunk size linechunked size line too longEOF in chunk trailer CRLFmust not poll after completePointerCheckBytesErrorUnfold must not be polled after it returned `Poll::Ready(None)`NewKeyCheckErrorValueCheckErroriouring.bufring: dropped while registeredstruct AccessLogConfigstruct GeoUpdateConfigstruct RuleListConfigstruct PanelConfigstruct ShadowsocksInvalidAccessConfigstruct NtpSyncConfigstruct SsIpUserCacheConfigstruct NodeConfigstruct ExtraConfigSourcestruct RuntimeConfigstruct AcmeConfigstruct QuicSpecstruct EntryRouteSpecstruct WsSpecstru
+
+============================== ANCHOR: struct RuntimeConfig
+
+--- offset 2073277 ---
+efixesv4_networkslast_modifiedsource_urlspansregex_patternsvariant identifierBoxStream does not return Noneerror code VarIntEOF while reading chunk size linechunked size line too longEOF in chunk trailer CRLFmust not poll after completePointerCheckBytesErrorUnfold must not be polled after it returned `Poll::Ready(None)`NewKeyCheckErrorValueCheckErroriouring.bufring: dropped while registeredstruct AccessLogConfigstruct GeoUpdateConfigstruct RuleListConfigstruct PanelConfigstruct ShadowsocksInvalidAccessConfigstruct NtpSyncConfigstruct SsIpUserCacheConfigstruct NodeConfigstruct ExtraConfigSourcestruct RuntimeConfigstruct AcmeConfigstruct QuicSpecstruct EntryRouteSpecstruct WsSpecstruct H2Specstruct GrpcSpecstruct HttpupSpecstruct PolicySpecstruct RateLimitSpecstruct UserBindingSpecstruct StoredAccountstruct ApiResponsestruct RuntimeRoutestruct TargetSpecstruct RouteHijackSpecstruct InboundSpecWirestruct TrojanInboundSpecstruct ShadowsocksInboundSpecstruct ShadowsocksInvalidAccessCompatSpecstruct SsIpUserCacheCompatSpecstruct MieruUserSpecstruct TlsInboundSpecstruct MieruInboundSpecstruct AnyTlsInboundSpecstruct VlessInboundSpecstruct InboundRealitySpecstruct HttpProxyOutboundSpecstruct NaiveOutboundSpecstruct MieruOutboundSpecstruct TrojanOutboundSpecstruct VlessOutboundSpecstruct SocksOutboundSpecstruct VmessOutboundSpecstruct ShadowsocksOutboundSpecstruct AnyTlsOutboundSpecstruct Hysteria2ObfsSpecstruct Hysteria2OutboundSpecstruct OutboundSpecWirestruct variant OutboundMuxSpecRaw::Fullstruct RealitySpecthe DNS provider does not support the specified record typethe given record value is invalidPermanentIdentifierHardwareModuleTcpRealityWsH2HttpUpXhttpIpHintYamuxH2muxCertificateIdentifierauthority_key_identifierTupleStructCheckErrorfield_indexInvalidStructvariant_nameInva
+
+============================== ANCHOR: all nodes disabled
+
+--- offset 1592822 ---
+-lc/crypto/dsa/dsa.c
+OpenSSL DSA method
+SHAKE128
+/aws-lc/crypto/fipsmodule/ec/scalar.c
+/aws-lc/crypto/fipsmodule/ec/p384.c
+/aws-lc/crypto/ube/fork_ube_detect.c
+libunwind: malformed DW_CFA_same_value DWARF unwind, reg too big
+xmm4
+xmm8
+reconcile.init: initial reconcile completedconfig check passed
+ntp.sync: built-in server failed, trying nextntp.sync: all sync attempts failed; time offset remains 0persist: loaded user storepersist: failed to parse user store, starting emptypersist: failed to read user store file, starting emptypersist: no user store file found, starting emptyomni_docker_enableall nodes disabled due to license verification failuresntp: failed to parse timezone string, using system defaultntp: software time sync enabledconfig has both `nodes` and `panel`; `nodes` mode takes precedence and panel-only pipeline is disabledpanel client configuredfailed to create panel client; panel polling disabledFailed building the Runtimeomni-cli 0.1.5
+event apps/omni-cli/src/main.rs:80apps/omni-cli/src/main.rsevent apps/omni-cli/src/main.rs:67event apps/omni-cli/src/main.rs:68event apps/omni-cli/src/main.rs:56event apps/omni-cli/src/main.rs:62event apps/omni-cli/src/main.rs:71event apps/omni-cli/src/main.rs:59check_configthe following required argument was not provided: check_configCliCONFIGConfig file path (.json or .toml). Used when no subcommand is givenCHECK_CONFIGValidate config and capability matrix, then exitcheck-configomni-rs v2 framework runtimeConfig file path (.json or .toml)Start the server (v1-compatible alias for the default behaviour)Print CLI versionSubcommands (v1 compatibility: `omni-rs server -c config.json`)
+aead::Errormatch state
+
+============================== ANCHOR: mux_cool
+
+--- offset 1214376 ---
+rejectedHTTP/0.9dump_dirjson.tmpNXDomainIpv4Hint
+ h
+datetimeInternal+
+?SlimAVX2SHA3_256SHA3_512SettingswildcardcategoryNomError
+TooLargeMlKem768ThunderXDenver 2original
+replacesproviderdns_jsonYXDomainManyTillIpv6Cidrxudp_muxflush_ok
+AssignedBugineseduployanKatakana
+overflow
+DeadlockBroadcomAllocErr
+APRIORITYseverity
+ugaritic
+FF
+9a
+deadlockAbnormal
+cert_pemk
+matchingmux_cool
+!/:@[`{~Phags_Pa
+Saturday
+omni-clikey_typenew_renokey_filerule_key
+ i
+username
+kEH_DescGujarati'
+identity
+DateTimereset_attimezonegroup_idip_cidrscertFile<locked>DATAGRAMSearcherk
+*!
+BopomofoJavanese
+dropping+
+EkuErrorVerifiera stringRejectedFieldSetCaptures
++ 
+0<
+.A
+ack_timexidstart( 
+( 
+quic keyexpectedffffff
+invalid.ipv6hintselectorSourceIphash_lenCowBytes
+ocommentTagbanwa
+December
+?argumentRESPONSEprogressattemptsup_bytesapi_hostImplicit
+extenderDuployanhiragana`
+ExpectedMetadata
+|0
+@DnsQueryNO_COLORpasswordfallbackStandard
+UnixTime
+-C
+?NO_PROXYprofilesKey65535ParseIntINDIRECTCapacityintervalPatterns
+gurmukhimahajani 
+Ipv4AddrNulErrorCONTINUE
+?@
+SHA3_384HTTP/2.0RecordIddata_dirdisabled
+grpc+tlsNO_ERROR
+gujaratiP
+NoKeyLog
+StreamIdReserved
+ConflictAllTotal
+--- offset 1380555 ---
+Proxy-Authorization: Basic 
+cert_mode=
+: acme.email must not be empty
+1hysteria2/h3: invalid tcp request padding length 
+resolve_tls_pems: cert_mode='
+' cert_domain='
+limiter inbound_tag: 
+crates/omni-core/src/runtime/assembly/route_ast.rs
+crates/omni-domain/src/matching/ast.rs
+invalid config for 
+: 
+upstream I/O: 
+Failed to serialize request: 
+ sing-mux: invalid domain UTF-8: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.149/src/value/ser.rs
+xboard.ws: unknown event: 
+trojan: fallback connect to 
+ failed
+crates/omni-proto/src/mux_cool/session.rs
+/shadowsocks/udp2022: socks5 addr parse failed: 
+, dropping
+-vmess: invalid UUID in extra["users"] array: 
+crates/omni-proto/src/crypto.rs
+ tx frm GREASE stream=
+ len=0
+ dropped epoch 
+ state
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/transport_params.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lru-slab-0.1.2/src/lib.rs
+wrote 
+ CRYPTO bytes
+8internal error: entered unreachable code: tried to send 
+ packet without keys
+GSO disabled: kernel too old (
+); need 4.18+
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/memchr-2.8.0/src/arch/all/packedpair/mod.rs
+-first capture group (at index 0) for pattern 
+  has a name (it must be unnamed)
+Qinternal error: entered unreachable code: found impossible error in meta engine: 
+!quit search after observing byte 
+ at offset 
+gave up searching at offset 
+recv_headers for old stream=
+, sending STREAM_CLOSED
+Cconnection error PROTOCOL_ERROR -- recv_data: stream not found; id=
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/h2-0.4.13/src/proto/streams/buffer.rs
+decremented stream window; id=
+; decr=
+--- offset 1572416 ---
+P recv error: 
+on server control stream: 
+protocol 
+ does not support transport 
+route rule[
+] domain pattern[
+] is empty
+default_outbound "
+!" does not match any outbound tag
+GET 
+ HTTP/1.1
+Host: 
+Connection: Upgrade
+Upgrade: websocket
+rule#
+[hijack]
+invalid displacement: value 
+ at index 
+in ReadTcpState::LenBytes: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-stream-0.1.18/src/wrappers/broadcast.rs
+crates/omni-panel/src/transport/xboard.rs
+xboard.ws: trying 
+1xboard.ws: failed to parse sync.config envelope: 
+crates/omni-proto/src/mux_cool/frame.rs
+naive: invalid IPv6 address 
+vless: invalid key length 
+xhttp session 
+": expired (pair timeout), removing
+ connection established: proto=
+ cipher=
+ curve=
+ sigalg=
+ resumed=
+ peer reused CID 
+ from path 
+ on path 
+Indexed index=
+ static=
+ STREAMS_BLOCKED type=bidi limit=
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quick-xml-0.39.2/src/parser/pi.rs
+close tag `</
+>` does not match any open tag
+syntax error: 
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn/src/mutex.rs
+*range start must not be greater than end: 
+ <= 
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/lib.rs
+handshake failed: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-automata-0.4.14/src/dfa/accel.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-automata-0.4.14/src/util/determinize/mod.rs
+Acompiling DFA with start states exceeds pattern pattern limit of 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-syntax-0.8.10/src/hir/mod.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/
+--- offset 2109097 ---
+owsocks/inbound.rs:2792event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2659event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2800event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2828event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2843event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2861event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2917event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2465event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2474event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2520event crates/omni-proto/src/mux_cool/session.rs:508omni_proto::mux_cool::sessioncrates/omni-proto/src/mux_cool/session.rsevent crates/omni-proto/src/mux_cool/session.rs:590event crates/omni-proto/src/mux_cool/session.rs:615event crates/omni-proto/src/mux_cool/session.rs:522event crates/omni-proto/src/mux_cool/session.rs:337event crates/omni-proto/src/mux_cool/session.rs:367event crates/omni-proto/src/mux_cool/session.rs:387event crates/omni-proto/src/mux_cool/session.rs:357event crates/omni-proto/src/proto/mieru/outbound.rs:179event crates/omni-proto/src/proto/mieru/underlay.rs:118omni_proto::proto::mieru::underlaymeta_tsnow_minutescrates/omni-proto/src/proto/mieru/underlay.rsevent crates/omni-proto/src/proto/hysteria2/outbound.rs:544event crates/omni-proto/src/proto/anytls/inbound.rs:122omni_proto::proto::anytls::inboundcrates/omni-proto/src/proto/anytls/inbound.rsevent crates/omni-proto/src/proto/anytls/inbound.rs:153user_idevent crates/omni-proto/src/proto/anytls/inbound.rs:157event crates/omni-proto/src/proto/anytls/inbound.rs:169event crates/omni-proto/src/proto/anytls/inbound.rs:177event crates/omni-proto/src/proto/anytls/inbound.rs:199event crates/omni-proto/src/proto/anytls/inbound.rs:145event crates/
+--- offset 2109132 ---
+/omni-proto/src/proto/shadowsocks/inbound.rs:2659event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2800event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2828event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2843event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2861event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2917event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2465event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2474event crates/omni-proto/src/proto/shadowsocks/inbound.rs:2520event crates/omni-proto/src/mux_cool/session.rs:508omni_proto::mux_cool::sessioncrates/omni-proto/src/mux_cool/session.rsevent crates/omni-proto/src/mux_cool/session.rs:590event crates/omni-proto/src/mux_cool/session.rs:615event crates/omni-proto/src/mux_cool/session.rs:522event crates/omni-proto/src/mux_cool/session.rs:337event crates/omni-proto/src/mux_cool/session.rs:367event crates/omni-proto/src/mux_cool/session.rs:387event crates/omni-proto/src/mux_cool/session.rs:357event crates/omni-proto/src/proto/mieru/outbound.rs:179event crates/omni-proto/src/proto/mieru/underlay.rs:118omni_proto::proto::mieru::underlaymeta_tsnow_minutescrates/omni-proto/src/proto/mieru/underlay.rsevent crates/omni-proto/src/proto/hysteria2/outbound.rs:544event crates/omni-proto/src/proto/anytls/inbound.rs:122omni_proto::proto::anytls::inboundcrates/omni-proto/src/proto/anytls/inbound.rsevent crates/omni-proto/src/proto/anytls/inbound.rs:153user_idevent crates/omni-proto/src/proto/anytls/inbound.rs:157event crates/omni-proto/src/proto/anytls/inbound.rs:169event crates/omni-proto/src/proto/anytls/inbound.rs:177event crates/omni-proto/src/proto/anytls/inbound.rs:199event crates/omni-proto/src/proto/anytls/inbound.rs:145event crates/omni-proto/src/proto/trojan/inbound
+
+============================== ANCHOR: xboard.ws
+
+--- offset 1380466 ---
+flags=
+&tag=
+&value=
+#tls inbound rejected: unknown SNI '
+' (reject_unknown_sni=true)
+Proxy-Authorization: Basic 
+cert_mode=
+: acme.email must not be empty
+1hysteria2/h3: invalid tcp request padding length 
+resolve_tls_pems: cert_mode='
+' cert_domain='
+limiter inbound_tag: 
+crates/omni-core/src/runtime/assembly/route_ast.rs
+crates/omni-domain/src/matching/ast.rs
+invalid config for 
+: 
+upstream I/O: 
+Failed to serialize request: 
+ sing-mux: invalid domain UTF-8: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.149/src/value/ser.rs
+xboard.ws: unknown event: 
+trojan: fallback connect to 
+ failed
+crates/omni-proto/src/mux_cool/session.rs
+/shadowsocks/udp2022: socks5 addr parse failed: 
+, dropping
+-vmess: invalid UUID in extra["users"] array: 
+crates/omni-proto/src/crypto.rs
+ tx frm GREASE stream=
+ len=0
+ dropped epoch 
+ state
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/transport_params.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lru-slab-0.1.2/src/lib.rs
+wrote 
+ CRYPTO bytes
+8internal error: entered unreachable code: tried to send 
+ packet without keys
+GSO disabled: kernel too old (
+); need 4.18+
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/memchr-2.8.0/src/arch/all/packedpair/mod.rs
+-first capture group (at index 0) for pattern 
+  has a name (it must be unnamed)
+Qinternal error: entered unreachable code: found impossible error in meta engine: 
+!quit search after observing byte 
+ at offset 
+gave up searching at offset 
+recv_headers for old stream=
+, sending STREAM_CLOSED
+Cconnection error PROTOCOL_ERROR -- recv_data: stream not found; id=
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf
+--- offset 1393150 ---
+rorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/io/util/buf_reader.rs
+crates/omni-core/src/dataplane/io_uring/pool.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.32/src/future/maybe_done.rs
+AThread count overflowed the configured max count. Thread index = 
+, max threads = 
+ sing-mux: domain name too long (
+ bytes)
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tungstenite-0.24.0/src/buffer.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-tungstenite-0.24.0/src/tls.rs
+xboard.ws: 
+ failed: 
+.xboard.ws: failed to parse sync.devices data: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/http-body-util-0.1.3/src/combinators/collect.rs
+duplicate field `
+%mieru: invalid session protocol type 
+'vless: invalid hex in UUID at position 
+: 
+ss classic encrypt: 
+padding-md5=
+UdpSocketState::new failed: 
+Mktls: configuration failed and cannot fall back (ServerConnection consumed): 
+/rustc/b3869b94cd1ed4bfa2eb28f301535d5e9599c713/library/panic_abort/src/lib.rs
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/recovery/gcongestion/bbr2/mode.rs
+app_limited=
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/transport_parameters.rs
+wrote 
+ bytes
+switching remote CID to 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fastbloom-0.14.1/src/bit_vector.rs
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/range_set/array_range_set.rs
+invalid remote address: 
+ could not initialize ThreadRng: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-1.12.3/src/builders.rs
+/Users/errors
+--- offset 1393175 ---
+c/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/io/util/buf_reader.rs
+crates/omni-core/src/dataplane/io_uring/pool.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.32/src/future/maybe_done.rs
+AThread count overflowed the configured max count. Thread index = 
+, max threads = 
+ sing-mux: domain name too long (
+ bytes)
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tungstenite-0.24.0/src/buffer.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-tungstenite-0.24.0/src/tls.rs
+xboard.ws: 
+ failed: 
+.xboard.ws: failed to parse sync.devices data: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/http-body-util-0.1.3/src/combinators/collect.rs
+duplicate field `
+%mieru: invalid session protocol type 
+'vless: invalid hex in UUID at position 
+: 
+ss classic encrypt: 
+padding-md5=
+UdpSocketState::new failed: 
+Mktls: configuration failed and cannot fall back (ServerConnection consumed): 
+/rustc/b3869b94cd1ed4bfa2eb28f301535d5e9599c713/library/panic_abort/src/lib.rs
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/recovery/gcongestion/bbr2/mode.rs
+app_limited=
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/transport_parameters.rs
+wrote 
+ bytes
+switching remote CID to 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/fastbloom-0.14.1/src/bit_vector.rs
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/range_set/array_range_set.rs
+invalid remote address: 
+ could not initialize ThreadRng: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-1.12.3/src/builders.rs
+/Users/errorsio/.cargo/registry/src/in
+--- offset 1419684 ---
+nal; stream_id=
+Undefined error: 
+bad http request: 
+h2 send_data error: 
+header decode error: 
+maximum record limit for 
+ exceeded: 
+ records
+'could not parse an IP from hosts file (
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/idna-1.1.0/src/punycode.rs
+XML parse error: 
+crates/omni-core/src/dataplane/relay.rs
+invalid WebSocket host '
+': contains illegal characters
+#error from UDP, retrying over TCP: 
+gRPC h2 handshake failed: 
+inbound '
+!': failed to parse bind address '
+': 
+quiche: Config::new: 
+crates/omni-core/src/pipeline/inspector.rs
+"xboard.ws: enabled, connecting to 
+&priority=
+&weight=
+&port=
+&target=
+.tmp
+"metrics.server: started at http://
+/metrics
+received unexpected frame 
+ on control stream
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lru-0.12.5/src/lib.rs
+Content-Length: 
+websocket close error: 
+crates/omni-domain/src/ports/resolver.rs
+init failed for 
+: 
+(?i).*
+.*
+0Keep-alive timeout detected but tokens are low (
+), not closing session
++: 1st body of stream exceeds default credit
+1xboard.ws: failed to parse sync.user.delta data: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/h3-0.0.8/src/proto/varint.rs
+(rand_core::UnwrapErr: failed to unwrap: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/io/util/copy_bidirectional.rs
+6vmess: failed to create response payload AEAD cipher: 
+classic udp resp encrypt: 
+ rx pkt 
+checking peer ALPN 
+ against 
+Probe size 
+ failed 
+" times, treating as MTU limitation
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/ranges.rs
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/stre
+--- offset 1420206 ---
+s '
+': 
+quiche: Config::new: 
+crates/omni-core/src/pipeline/inspector.rs
+"xboard.ws: enabled, connecting to 
+&priority=
+&weight=
+&port=
+&target=
+.tmp
+"metrics.server: started at http://
+/metrics
+received unexpected frame 
+ on control stream
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lru-0.12.5/src/lib.rs
+Content-Length: 
+websocket close error: 
+crates/omni-domain/src/ports/resolver.rs
+init failed for 
+: 
+(?i).*
+.*
+0Keep-alive timeout detected but tokens are low (
+), not closing session
++: 1st body of stream exceeds default credit
+1xboard.ws: failed to parse sync.user.delta data: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/h3-0.0.8/src/proto/varint.rs
+(rand_core::UnwrapErr: failed to unwrap: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/io/util/copy_bidirectional.rs
+6vmess: failed to create response payload AEAD cipher: 
+classic udp resp encrypt: 
+ rx pkt 
+checking peer ALPN 
+ against 
+Probe size 
+ failed 
+" times, treating as MTU limitation
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/ranges.rs
+/Users/errorsio/.cargo/git/checkouts/quiche-01141795765c3f50/69468d8/quiche/src/stream/send_buf.rs
+cubic={ k=
+ w_max=
+ } 
+cwnd=
+rtt_stats=
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/token_memory_cache.rs
+/Users/errorsio/.cargo/git/checkouts/quinn-fd61fb4bc1b8964d/69b7a97/quinn-proto/src/connection/streams/recv.rs
+Error: 
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-automata-0.4.14/src/dfa/minimize.rs
+/Users/errorsio/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/regex-automata-0.4.14/src/hybrid/regex.rs
+invali
