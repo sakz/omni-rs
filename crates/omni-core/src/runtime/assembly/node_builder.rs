@@ -9,10 +9,18 @@ pub enum InboundProto {
     Shadowsocks(omni_proto::proto::shadowsocks::inbound::SsInboundConfig),
     Vless(Vec<[u8; 16]>),
     Vmess(Vec<[u8; 16]>),
-    Hysteria2 { password: String, tls: Option<TlsServerSetup> },
-    Anytls { password: String },
+    Hysteria2 {
+        password: String,
+        tls: Option<TlsServerSetup>,
+    },
+    Anytls {
+        password: String,
+    },
     Naive,
-    Mieru { username: String, password: String },
+    Mieru {
+        username: String,
+        password: String,
+    },
 }
 
 #[derive(Clone, Default)]
@@ -29,7 +37,10 @@ pub enum WrapTransport {
     Ws(omni_transport::ws::WsInboundSpec),
     HttpUp(omni_transport::httpup::HttpUpSpec),
     Grpc(String),
-    H2 { path: Option<String>, host: Option<String> },
+    H2 {
+        path: Option<String>,
+        host: Option<String>,
+    },
 }
 
 pub struct NodePlan {
@@ -52,7 +63,9 @@ impl std::fmt::Display for AssemblyError {
     }
 }
 
-fn spec_view(t: &Option<omni_config::wire::TlsInboundSpecWire>) -> omni_transport::tls::TlsSpecView<'_> {
+fn spec_view(
+    t: &Option<omni_config::wire::TlsInboundSpecWire>,
+) -> omni_transport::tls::TlsSpecView<'_> {
     match t {
         Some(s) => omni_transport::tls::TlsSpecView {
             cert_mode: s.cert_mode.as_deref(),
@@ -96,10 +109,7 @@ pub fn expand_listen_addrs(node: &NodeConfigWire) -> Result<Vec<SocketAddr>, Str
     if let Some(ranges) = &node.port_ranges {
         for r in ranges {
             if r.to < r.from {
-                return Err(format!(
-                    "invalid port range {}-{}",
-                    r.from, r.to
-                ));
+                return Err(format!("invalid port range {}-{}", r.from, r.to));
             }
             ports.extend(r.from..=r.to);
         }
@@ -107,7 +117,10 @@ pub fn expand_listen_addrs(node: &NodeConfigWire) -> Result<Vec<SocketAddr>, Str
     if ports.is_empty() {
         return Err("missing listen_port".to_string());
     }
-    Ok(ports.iter().map(|p| SocketAddr::new(listen_ip, *p)).collect())
+    Ok(ports
+        .iter()
+        .map(|p| SocketAddr::new(listen_ip, *p))
+        .collect())
 }
 
 pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, String> {
@@ -130,10 +143,12 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
                 InboundProto::Trojan(omni_proto::proto::trojan::password_hash(&pass))
             }
             "shadowsocks" | "ss" => {
-                let method = str_field(&node.protocol.fields, "method")
-                    .ok_or_else(|| "shadowsocks inbound requires a non-empty 'method'".to_string())?;
-                let password = str_field(&node.protocol.fields, "password")
-                    .ok_or_else(|| "shadowsocks inbound requires a non-empty 'password'".to_string())?;
+                let method = str_field(&node.protocol.fields, "method").ok_or_else(|| {
+                    "shadowsocks inbound requires a non-empty 'method'".to_string()
+                })?;
+                let password = str_field(&node.protocol.fields, "password").ok_or_else(|| {
+                    "shadowsocks inbound requires a non-empty 'password'".to_string()
+                })?;
                 InboundProto::Shadowsocks(
                     omni_proto::proto::shadowsocks::inbound::SsInboundConfig { method, password },
                 )
@@ -158,8 +173,9 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
                 InboundProto::Vmess(parsed)
             }
             "hysteria2" | "hy2" => {
-                let password = str_field(&node.protocol.fields, "password")
-                    .ok_or_else(|| "hysteria2 inbound requires a non-empty 'password'".to_string())?;
+                let password = str_field(&node.protocol.fields, "password").ok_or_else(|| {
+                    "hysteria2 inbound requires a non-empty 'password'".to_string()
+                })?;
                 hy2_password = Some(password);
                 hy2_tls = if let Some(ts) = &node.tls {
                     if ts.enabled || ts.cert_mode.is_some() {
@@ -203,8 +219,9 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
                 }
                 let mut parsed = Vec::new();
                 for u in uuids.into_iter().flatten() {
-                    let b = crate::crypto_shim::parse_uuid(&u)
-                        .ok_or_else(|| format!("vmess: invalid UUID in extra[\"users\"] array: {}", u))?;
+                    let b = crate::crypto_shim::parse_uuid(&u).ok_or_else(|| {
+                        format!("vmess: invalid UUID in extra[\"users\"] array: {}", u)
+                    })?;
                     parsed.push(b);
                 }
                 if parsed.is_empty() {
@@ -213,10 +230,7 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
                 InboundProto::Vless(parsed)
             }
             other => {
-                return Err(format!(
-                    "inbound protocol '{}' not yet implemented",
-                    other
-                ));
+                return Err(format!("inbound protocol '{}' not yet implemented", other));
             }
         };
 
@@ -224,8 +238,7 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
             if ts.enabled || ts.cert_mode.is_some() {
                 let view = spec_view(&node.tls);
                 let email_present = false;
-                let material =
-                    omni_transport::tls::resolve_tls_pems(&view, email_present)?;
+                let material = omni_transport::tls::resolve_tls_pems(&view, email_present)?;
                 Some(TlsServerSetup {
                     material_cert: material.cert_pem,
                     material_key: material.key_pem,
@@ -324,5 +337,5 @@ impl Default for CryptoShim {
 }
 
 pub fn io_err_pub(msg: &str) -> std::io::Error {
-    std::io::Error::other( msg.to_string())
+    std::io::Error::other(msg.to_string())
 }

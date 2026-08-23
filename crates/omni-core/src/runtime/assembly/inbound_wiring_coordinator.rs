@@ -1,4 +1,3 @@
-
 #[derive(Debug)]
 pub struct NotReady(pub &'static str);
 

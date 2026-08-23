@@ -1,12 +1,11 @@
+use serde::Serialize;
 
-    use serde::Serialize;
-
-    #[derive(Debug, Clone, Serialize)]
-    pub struct TrafficReport {
-        pub uplink: u64,
-        pub downlink: u64,
-        pub online: u32,
-    }
+#[derive(Debug, Clone, Serialize)]
+pub struct TrafficReport {
+    pub uplink: u64,
+    pub downlink: u64,
+    pub online: u32,
+}
 
 #[derive(Debug)]
 pub struct NotReady(pub &'static str);

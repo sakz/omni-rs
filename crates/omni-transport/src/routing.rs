@@ -109,8 +109,7 @@ pub fn parse_sni(buf: &[u8]) -> Option<String> {
             let list_end = (body_start + 2 + list_len).min(body_start + elen);
             while r + 3 <= list_end {
                 let name_type = buf[r];
-                let nlen =
-                    u16::from_be_bytes([buf[r + 1], buf[r + 2]]) as usize;
+                let nlen = u16::from_be_bytes([buf[r + 1], buf[r + 2]]) as usize;
                 let ns = r + 3;
                 if name_type == 0 && ns + nlen <= list_end {
                     if let Ok(s) = std::str::from_utf8(&buf[ns..ns + nlen]) {
@@ -212,7 +211,10 @@ mod tests {
     #[test]
     fn http_host_parse() {
         let req = b"GET / HTTP/1.1\r\nHost: www.Example.COM:8443\r\n\r\n";
-        assert_eq!(parse_http_host_header(req).as_deref(), Some("www.Example.COM"));
+        assert_eq!(
+            parse_http_host_header(req).as_deref(),
+            Some("www.Example.COM")
+        );
     }
 
     #[test]

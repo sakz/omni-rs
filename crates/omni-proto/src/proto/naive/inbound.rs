@@ -4,7 +4,14 @@ use tokio::io::{AsyncRead, AsyncWrite};
 
 pub async fn serve<S>(
     stream: S,
-    on_connect: impl Fn(BoxProxyStream, String) -> std::pin::Pin<Box<dyn std::future::Future<Output = io::Result<()>> + Send>> + Send + Sync + 'static + Clone,
+    on_connect: impl Fn(
+            BoxProxyStream,
+            String,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = io::Result<()>> + Send>>
+        + Send
+        + Sync
+        + 'static
+        + Clone,
 ) -> io::Result<()>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,

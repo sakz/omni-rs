@@ -1,4 +1,6 @@
-use super::frame::{try_decode, DecodeOutcome, Frame, CMD_ALERT, CMD_FIN, CMD_PSH, CMD_SETTINGS, CMD_SYN, CMD_WASTE};
+use super::frame::{
+    try_decode, DecodeOutcome, Frame, CMD_ALERT, CMD_FIN, CMD_PSH, CMD_SETTINGS, CMD_SYN, CMD_WASTE,
+};
 use bytes::Bytes;
 use std::collections::HashMap;
 use std::io;
@@ -258,5 +260,3 @@ where
         }
     }
 }
-
-

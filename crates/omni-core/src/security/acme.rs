@@ -3,9 +3,8 @@ use rcgen::{CertificateParams, DnType, KeyPair};
 use sha2::Digest;
 use std::io;
 
-
 fn ioerr(msg: String) -> io::Error {
-    io::Error::other( msg)
+    io::Error::other(msg)
 }
 
 pub fn key_authorization(token: &str, thumbprint_b64: &str) -> String {
@@ -29,22 +28,24 @@ pub fn generate_validation_cert(
 
     let mut ext_der = vec![0x04, 0x20];
     ext_der.extend_from_slice(key_auth_sha256);
-    params.custom_extensions.push(rcgen::CustomExtension::from_oid_content(
-        &[0x1B, 0x21, 0x57, 0x4A, 0x47, 0x44],
-        ext_der,
-    ));
+    params
+        .custom_extensions
+        .push(rcgen::CustomExtension::from_oid_content(
+            &[0x1B, 0x21, 0x57, 0x4A, 0x47, 0x44],
+            ext_der,
+        ));
 
     let key_pair = KeyPair::generate().map_err(|e| ioerr(format!("acme: keygen: {}", e)))?;
     let cert = params
         .self_signed(&key_pair)
         .map_err(|e| ioerr(format!("acme: sign: {}", e)))?;
-    Ok((cert.pem().into_bytes(), key_pair.serialize_pem().into_bytes()))
+    Ok((
+        cert.pem().into_bytes(),
+        key_pair.serialize_pem().into_bytes(),
+    ))
 }
 
-pub async fn create_account(
-    directory_url: &str,
-    contact_email: &str,
-) -> io::Result<Account> {
+pub async fn create_account(directory_url: &str, contact_email: &str) -> io::Result<Account> {
     let builder = Account::builder().map_err(|e| ioerr(e.to_string()))?;
     let contact = format!("mailto:{}", contact_email);
     let new_account = NewAccount {

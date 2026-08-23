@@ -15,7 +15,7 @@ pub struct MieruInboundConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::other( format!("mieru: {}", msg))
+    io::Error::other(format!("mieru: {}", msg))
 }
 
 fn epoch_minute() -> u64 {
@@ -34,8 +34,7 @@ struct SegmentState {
 impl SegmentState {
     fn encrypt_segment(&mut self, proto_type: u8, payload: &[u8], first: bool) -> Vec<u8> {
         let em = epoch_minute() as u32;
-        let metadata =
-            build_metadata(proto_type, em, 0, self.seq, 0, payload.len() as u16, 0);
+        let metadata = build_metadata(proto_type, em, 0, self.seq, 0, payload.len() as u16, 0);
         let enc_meta = crypto::seal(&self.key, &self.nonce, &metadata);
 
         let nonce_len = if first { NONCE_SIZE } else { 0 };
@@ -94,9 +93,12 @@ where
 
     let client_nonce: [u8; 24] = seg_buf[..NONCE_SIZE].try_into().unwrap();
     let meta_plain = {
-        
-        crypto::open(&key, &client_nonce, &seg_buf[NONCE_SIZE..NONCE_SIZE + METADATA_SIZE + TAG_SIZE])
-            .ok_or_else(|| io_err("mieru: authentication failed"))?
+        crypto::open(
+            &key,
+            &client_nonce,
+            &seg_buf[NONCE_SIZE..NONCE_SIZE + METADATA_SIZE + TAG_SIZE],
+        )
+        .ok_or_else(|| io_err("mieru: authentication failed"))?
     };
     let md = parse_metadata(meta_plain.as_slice().try_into().unwrap());
 
@@ -107,14 +109,21 @@ where
 
     use omni_domain::socks5::Socks5Addr;
     let (addr, _) = Socks5Addr::decode(addr_bytes).map_err(|e| {
-        io::Error::new(io::ErrorKind::InvalidData, format!("mieru: socks addr: {e}"))
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("mieru: socks addr: {e}"),
+        )
     })?;
     let target = addr.to_proxy_target();
 
     // Generate response nonce and send openSessionResponse.
     let resp_nonce: [u8; 24] = rand::thread_rng().gen();
 
-    let mut st_resp = SegmentState { key, nonce: resp_nonce, seq: 0 };
+    let mut st_resp = SegmentState {
+        key,
+        nonce: resp_nonce,
+        seq: 0,
+    };
     let resp_seg = st_resp.encrypt_segment(super::PROTO_OPEN_SESSION_RESP, &[], false);
     tls_stream.write_all(&resp_seg).await?;
 
@@ -146,8 +155,12 @@ where
             while buf.len() >= METADATA_SIZE + TAG_SIZE {
                 let mut st = crs.lock().await;
                 let mut nonce = st.nonce;
-                if buf.len() < METADATA_SIZE + TAG_SIZE { break; }
-                let Some(meta_plain) = crypto::open(&st.key, &nonce, &buf[..METADATA_SIZE + TAG_SIZE]) else {
+                if buf.len() < METADATA_SIZE + TAG_SIZE {
+                    break;
+                }
+                let Some(meta_plain) =
+                    crypto::open(&st.key, &nonce, &buf[..METADATA_SIZE + TAG_SIZE])
+                else {
                     return;
                 };
                 let md = parse_metadata(meta_plain.as_slice().try_into().unwrap());
@@ -186,7 +199,9 @@ where
     tokio::spawn(async move {
         let mut sws = sws_arc.lock().await;
         while let Some(data) = in_rx.recv().await {
-            if data.is_empty() { continue; }
+            if data.is_empty() {
+                continue;
+            }
             let seg = sws.encrypt_segment(super::PROTO_DATA_S2C, &data, false);
             if wh.write_all(&seg).await.is_err() {
                 break;
@@ -196,12 +211,15 @@ where
     });
     drop(server_write_state);
 
-    Ok((target, Box::new(ChannelDuplex {
-        rx: out_rx,
-        pending: std::collections::VecDeque::new(),
-        eof: false,
-        tx: in_tx,
-    }) as BoxProxyStream))
+    Ok((
+        target,
+        Box::new(ChannelDuplex {
+            rx: out_rx,
+            pending: std::collections::VecDeque::new(),
+            eof: false,
+            tx: in_tx,
+        }) as BoxProxyStream,
+    ))
 }
 
 struct SegmentReadState {

@@ -1,7 +1,7 @@
 use super::aead_header::{
-    kdf, kdf16, KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_IV,
-    KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_KEY, KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_IV,
-    KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_KEY, KDF_SALT_CONST_AUTH_ID_ENCRYPTION_KEY,
+    kdf, kdf16, KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_IV, KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_KEY,
+    KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_IV, KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_KEY,
+    KDF_SALT_CONST_AUTH_ID_ENCRYPTION_KEY,
 };
 use super::chunk::{ChunkKeys, ChunkReader, ChunkSecurity, ChunkWriter};
 use super::{cmd_key, decode_request_command, DecodedRequest};
@@ -33,8 +33,7 @@ fn aes_ecb_decrypt_one(key16: &[u8; 16], block: &[u8; 16]) -> [u8; 16] {
 
 fn gcm_seal(key: &[u8; 16], nonce: &[u8; 12], plaintext: &[u8], aad: &[u8]) -> io::Result<Vec<u8>> {
     use aes_gcm::aead::{AeadInPlace, KeyInit};
-    let c = aes_gcm::Aes128Gcm::new_from_slice(key)
-        .map_err(|_| ioerr("vmess: gcm init"))?;
+    let c = aes_gcm::Aes128Gcm::new_from_slice(key).map_err(|_| ioerr("vmess: gcm init"))?;
     let mut buf_v = plaintext.to_vec();
     let tag = c
         .encrypt_in_place_detached(aes_gcm::Nonce::from_slice(nonce), aad, &mut buf_v)
@@ -141,7 +140,8 @@ where
     let mut len_nonce = [0u8; 12];
     len_nonce.copy_from_slice(&len_nonce_full[..12]);
 
-    let len_plain = gcm_open(&len_key, &len_nonce, &enc_len, &auth_id).ok_or_else(|| ioerr("vmess: header length decrypt failed"))?;
+    let len_plain = gcm_open(&len_key, &len_nonce, &enc_len, &auth_id)
+        .ok_or_else(|| ioerr("vmess: header length decrypt failed"))?;
     if len_plain.len() != 2 {
         return Err(ioerr("vmess: bad header length block"));
     }
@@ -168,7 +168,8 @@ where
 
     let mut enc_hdr = vec![0u8; hdr_len + 16];
     stream.read_exact(&mut enc_hdr).await?;
-    let cmd_buf = gcm_open(&hdr_key, &hdr_nonce, &enc_hdr, &auth_id).ok_or_else(|| ioerr("vmess: header payload decrypt failed"))?;
+    let cmd_buf = gcm_open(&hdr_key, &hdr_nonce, &enc_hdr, &auth_id)
+        .ok_or_else(|| ioerr("vmess: header payload decrypt failed"))?;
 
     let req = decode_request_command(&cmd_buf)?;
 
@@ -217,7 +218,12 @@ where
     let mut rp_nonce = [0u8; 12];
     rp_nonce.copy_from_slice(&rp_nonce_full[..12]);
 
-    let enc_len = gcm_seal(&rl_key, &rl_nonce, &(resp_payload.len() as u16).to_be_bytes(), b"")?;
+    let enc_len = gcm_seal(
+        &rl_key,
+        &rl_nonce,
+        &(resp_payload.len() as u16).to_be_bytes(),
+        b"",
+    )?;
     let enc_payload = gcm_seal(&rp_key, &rp_nonce, &resp_payload, b"")?;
     tracing::debug!(target: "internal.pipeline", "vmess inbound writing resp len={} payload={}", enc_len.len(), enc_payload.len());
     wh.write_all(&enc_len).await?;
@@ -235,5 +241,5 @@ where
 }
 
 fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::other( msg)
+    std::io::Error::other(msg)
 }

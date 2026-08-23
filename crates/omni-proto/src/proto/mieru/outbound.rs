@@ -18,7 +18,7 @@ pub struct MieruOutboundConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::other( format!("mieru: {}", msg))
+    io::Error::other(format!("mieru: {}", msg))
 }
 
 fn epoch_minute() -> u64 {
@@ -37,12 +37,12 @@ struct SegmentState {
 impl SegmentState {
     fn encrypt_segment(&mut self, proto_type: u8, payload: &[u8], first: bool) -> Vec<u8> {
         let em = epoch_minute() as u32;
-        let metadata =
-            build_metadata(proto_type, em, 0, self.seq, 0, payload.len() as u16, 0);
+        let metadata = build_metadata(proto_type, em, 0, self.seq, 0, payload.len() as u16, 0);
         let enc_meta = crypto::seal(&self.key, &self.nonce, &metadata);
 
         let nonce_len = if first { NONCE_SIZE } else { 0 };
-        let mut out = Vec::with_capacity(4 + nonce_len + METADATA_SIZE + TAG_SIZE + payload.len() + TAG_SIZE);
+        let mut out =
+            Vec::with_capacity(4 + nonce_len + METADATA_SIZE + TAG_SIZE + payload.len() + TAG_SIZE);
         out.extend_from_slice(
             &(4 + nonce_len + METADATA_SIZE + TAG_SIZE + payload.len() + TAG_SIZE).to_be_bytes(),
         );
@@ -61,7 +61,11 @@ impl SegmentState {
         out
     }
 
-    fn decrypt_segment(&mut self, data: &[u8], has_nonce: bool) -> Option<(ParsedMetadata, Vec<u8>)> {
+    fn decrypt_segment(
+        &mut self,
+        data: &[u8],
+        has_nonce: bool,
+    ) -> Option<(ParsedMetadata, Vec<u8>)> {
         let mut off = 0usize;
         let mut nonce = self.nonce;
         if has_nonce {
@@ -75,23 +79,23 @@ impl SegmentState {
             return None;
         }
 
-        let meta_plain =
-            crypto::open(&self.key, &nonce, &data[off..off + METADATA_SIZE + TAG_SIZE])?;
+        let meta_plain = crypto::open(
+            &self.key,
+            &nonce,
+            &data[off..off + METADATA_SIZE + TAG_SIZE],
+        )?;
         let md = parse_metadata(meta_plain.as_slice().try_into().ok()?);
 
         let payload_start = off + METADATA_SIZE + TAG_SIZE;
         let payload_end = payload_start + md.payload_len as usize + TAG_SIZE;
         let mut n2 = nonce;
         crypto::increment_nonce(&mut n2);
-        let payload = if md.payload_len > 0 && data.len() >= payload_start && data.len() >= payload_end {
-            crypto::open(
-                &self.key,
-                &n2,
-                &data[payload_start..payload_end],
-            )?
-        } else {
-            Vec::new()
-        };
+        let payload =
+            if md.payload_len > 0 && data.len() >= payload_start && data.len() >= payload_end {
+                crypto::open(&self.key, &n2, &data[payload_start..payload_end])?
+            } else {
+                Vec::new()
+            };
 
         crypto::increment_nonce(&mut self.nonce);
         if md.payload_len > 0 {
@@ -199,7 +203,11 @@ pub async fn connect_tcp<S>(
 where
     S: ProxyStream + 'static,
 {
-    let key = crypto::derive_key(cfg.username.as_bytes(), cfg.password.as_bytes(), epoch_minute());
+    let key = crypto::derive_key(
+        cfg.username.as_bytes(),
+        cfg.password.as_bytes(),
+        epoch_minute(),
+    );
     let nonce: [u8; NONCE_SIZE] = rand::thread_rng().gen();
 
     let mut st = SegmentState { key, nonce, seq: 0 };
@@ -242,8 +250,10 @@ where
 
     let (rh, wh) = tokio::io::split(underlay);
     let (out_tx, out_rx) = mpsc::unbounded_channel::<io::Result<Vec<u8>>>();
-    let (in_tx, mut in_rx): (mpsc::UnboundedSender<Vec<u8>>, mpsc::UnboundedReceiver<Vec<u8>>) =
-        mpsc::unbounded_channel();
+    let (in_tx, mut in_rx): (
+        mpsc::UnboundedSender<Vec<u8>>,
+        mpsc::UnboundedReceiver<Vec<u8>>,
+    ) = mpsc::unbounded_channel();
 
     // Read pump: decrypt incoming segments.
     tokio::spawn(async move {
@@ -260,8 +270,8 @@ where
                 let mut stg = st.lock().await;
                 match stg.decrypt_segment(&buf, false) {
                     Some((md, payload)) => {
-                        let consumed = METADATA_SIZE + TAG_SIZE
-                            + md.payload_len as usize + TAG_SIZE;
+                        let consumed =
+                            METADATA_SIZE + TAG_SIZE + md.payload_len as usize + TAG_SIZE;
                         drop(stg);
                         buf.drain(..consumed.min(buf.len()));
                         if !payload.is_empty() && out_tx.send(Ok(payload)).is_err() {

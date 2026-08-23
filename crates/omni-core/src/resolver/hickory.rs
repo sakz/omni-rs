@@ -1,6 +1,6 @@
 use hickory_resolver::config::{NameServerConfig, ResolverConfig};
 use hickory_resolver::name_server::TokioConnectionProvider;
-use hickory_resolver:: Resolver as HickoryResolver;
+use hickory_resolver::Resolver as HickoryResolver;
 use omni_domain::ports::resolver::{ResolveFut, ResolvedAddrs};
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -17,7 +17,10 @@ impl HickoryDns {
         }
         for s in servers {
             let addr = normalize_dns_addr(s)?;
-            cfg.add_name_server(NameServerConfig::new(addr, hickory_resolver::proto::xfer::Protocol::Udp));
+            cfg.add_name_server(NameServerConfig::new(
+                addr,
+                hickory_resolver::proto::xfer::Protocol::Udp,
+            ));
         }
         Ok(HickoryDns {
             inner: HickoryResolver::builder_with_config(cfg, TokioConnectionProvider::default())
@@ -30,10 +33,14 @@ fn normalize_dns_addr(s: &str) -> Result<SocketAddr, String> {
     let s = s.trim_start_matches("udp://").trim_start_matches("tcp://");
     if let Some(rest) = s.strip_prefix("https://") {
         let host = rest.split('/').next().unwrap_or(rest);
-        return format!("{}:443", host).parse().map_err(|e| format!("{}", e));
+        return format!("{}:443", host)
+            .parse()
+            .map_err(|e| format!("{}", e));
     }
     if let Some(rest) = s.strip_prefix("tls://") {
-        return format!("{}:853", rest).parse().map_err(|e| format!("{}", e));
+        return format!("{}:853", rest)
+            .parse()
+            .map_err(|e| format!("{}", e));
     }
     if !s.contains(':') {
         return format!("{}:53", s).parse().map_err(|e| format!("{}", e));
@@ -62,11 +69,8 @@ impl omni_domain::ports::resolver::Resolver for HickoryDns {
                 .0
                 .lookup_ip(host)
                 .await
-                .map_err(|e| std::io::Error::other( format!("dns: {}", e)))?;
-            let addrs: Vec<SocketAddr> = resp
-                .iter()
-                .map(|ip| SocketAddr::new(ip, port))
-                .collect();
+                .map_err(|e| std::io::Error::other(format!("dns: {}", e)))?;
+            let addrs: Vec<SocketAddr> = resp.iter().map(|ip| SocketAddr::new(ip, port)).collect();
             Ok(ResolvedAddrs { addrs })
         };
         Box::pin(fut)
@@ -81,7 +85,7 @@ impl omni_domain::ports::resolver::Resolver for SystemResolver {
         Box::pin(async move {
             let mut iter = tokio::net::lookup_host((host.as_str(), port))
                 .await
-                .map_err(|e| std::io::Error::other( format!("dns: {}", e)))?;
+                .map_err(|e| std::io::Error::other(format!("dns: {}", e)))?;
             let addrs: Vec<SocketAddr> = iter.by_ref().collect();
             Ok(ResolvedAddrs { addrs })
         })

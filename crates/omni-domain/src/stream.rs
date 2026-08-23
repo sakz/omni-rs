@@ -82,9 +82,7 @@ pub trait OutboundUdp: Send + Sync {
     fn connect_udp(
         &self,
         target: &ProxyTarget,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = std::io::Result<UdpHandle>> + Send + '_>,
-    >;
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = std::io::Result<UdpHandle>> + Send + '_>>;
 
     fn supports_udp(&self) -> bool {
         true

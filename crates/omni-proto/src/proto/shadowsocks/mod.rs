@@ -215,19 +215,30 @@ impl SsAead {
         }
     }
 
-    pub fn seal(&self, nonce: &[u8; NONCE_LEN], aad: &[u8], plaintext: &mut Vec<u8>) -> Option<Vec<u8>> {
+    pub fn seal(
+        &self,
+        nonce: &[u8; NONCE_LEN],
+        aad: &[u8],
+        plaintext: &mut Vec<u8>,
+    ) -> Option<Vec<u8>> {
         match self {
             SsAead::Aes128(c) => {
                 let n = aes_gcm::Nonce::from_slice(nonce);
-                c.encrypt_in_place_detached(n, aad, plaintext).ok().map(|t| t.to_vec())
+                c.encrypt_in_place_detached(n, aad, plaintext)
+                    .ok()
+                    .map(|t| t.to_vec())
             }
             SsAead::Aes256(c) => {
                 let n = aes_gcm::Nonce::from_slice(nonce);
-                c.encrypt_in_place_detached(n, aad, plaintext).ok().map(|t| t.to_vec())
+                c.encrypt_in_place_detached(n, aad, plaintext)
+                    .ok()
+                    .map(|t| t.to_vec())
             }
             SsAead::ChaCha(c) => {
                 let n = chacha20poly1305::Nonce::from_slice(nonce);
-                c.encrypt_in_place_detached(n, aad, plaintext).ok().map(|t| t.to_vec())
+                c.encrypt_in_place_detached(n, aad, plaintext)
+                    .ok()
+                    .map(|t| t.to_vec())
             }
         }
     }
@@ -248,7 +259,12 @@ impl SsAead {
                 .decrypt_in_place_detached(aes_gcm::Nonce::from_slice(nonce), aad, ciphertext, tag)
                 .is_ok(),
             SsAead::ChaCha(c) => c
-                .decrypt_in_place_detached(chacha20poly1305::Nonce::from_slice(nonce), aad, ciphertext, tag)
+                .decrypt_in_place_detached(
+                    chacha20poly1305::Nonce::from_slice(nonce),
+                    aad,
+                    ciphertext,
+                    tag,
+                )
                 .is_ok(),
         }
     }
@@ -267,7 +283,10 @@ mod tests {
 
     #[test]
     fn sha1_vector() {
-        assert_eq!(hex_of(&hkdf_sha1::sha1(b"abc")), "a9993e364706816aba3e25717850c26c9cd0d89d");
+        assert_eq!(
+            hex_of(&hkdf_sha1::sha1(b"abc")),
+            "a9993e364706816aba3e25717850c26c9cd0d89d"
+        );
     }
 
     fn hex_of(b: &[u8]) -> String {
@@ -276,7 +295,11 @@ mod tests {
 
     #[test]
     fn ss_aead_roundtrip() {
-        for m in [Method::Aes128Gcm, Method::Aes256Gcm, Method::ChaCha20IetfPoly1305] {
+        for m in [
+            Method::Aes128Gcm,
+            Method::Aes256Gcm,
+            Method::ChaCha20IetfPoly1305,
+        ] {
             let key = vec![7u8; m.key_len()];
             let cipher = SsAead::new(m, &key);
             let mut pt = b"hello shadowsocks aead payload".to_vec();

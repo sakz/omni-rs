@@ -28,7 +28,7 @@ fn security_byte(s: &str) -> io::Result<u8> {
 }
 
 fn io_err(msg: String) -> std::io::Error {
-    std::io::Error::other( msg)
+    std::io::Error::other(msg)
 }
 
 pub type VmessConn<S> = (
@@ -58,9 +58,7 @@ where
     }
     let response_v = crate::random_bytes::<1>()[0];
 
-    let options = super::OPT_CHUNK_STREAM
-        | super::OPT_CHUNK_MASKING
-        | super::OPT_GLOBAL_PADDING;
+    let options = super::OPT_CHUNK_STREAM | super::OPT_CHUNK_MASKING | super::OPT_GLOBAL_PADDING;
 
     let cmd_buf = encode_request_command(
         &request_iv,
@@ -73,9 +71,7 @@ where
     );
 
     let sealed = seal_vmess_aead_header(&ck, &cmd_buf);
-    underlay
-        .write_all(&sealed)
-        .await?;
+    underlay.write_all(&sealed).await?;
     underlay.flush().await?;
 
     let resp_keys = {
@@ -89,13 +85,25 @@ where
         ChunkKeys { key: k, iv }
     };
 
-    let rl_key = kdf16(&resp_keys.key, &[KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_KEY.as_bytes()]);
-    let rl_nonce_full = kdf(&resp_keys.iv, &[KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_IV.as_bytes()]);
+    let rl_key = kdf16(
+        &resp_keys.key,
+        &[KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_KEY.as_bytes()],
+    );
+    let rl_nonce_full = kdf(
+        &resp_keys.iv,
+        &[KDF_SALT_CONST_AEAD_RESP_HEADER_LEN_IV.as_bytes()],
+    );
     let mut rl_nonce = [0u8; 12];
     rl_nonce.copy_from_slice(&rl_nonce_full[..12]);
 
-    let rp_key = kdf16(&resp_keys.key, &[KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_KEY.as_bytes()]);
-    let rp_nonce_full = kdf(&resp_keys.iv, &[KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_IV.as_bytes()]);
+    let rp_key = kdf16(
+        &resp_keys.key,
+        &[KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_KEY.as_bytes()],
+    );
+    let rp_nonce_full = kdf(
+        &resp_keys.iv,
+        &[KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_IV.as_bytes()],
+    );
     let mut rp_nonce = [0u8; 12];
     rp_nonce.copy_from_slice(&rp_nonce_full[..12]);
 

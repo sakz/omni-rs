@@ -1,13 +1,13 @@
 use crate::matching::geo::GeoRegistry;
 use crate::observability::online_tracker::OnlineTracker;
 use crate::observability::Counters;
+use crate::resolver::hickory::{HickoryDns, SystemResolver};
 use crate::runtime::assembly::listener_executor;
 use crate::runtime::assembly::node_builder::{build_node_plans, NodePlan};
 use crate::runtime::assembly::outbound_artifacts::{
-    DirectOutbound, HttpConnectConnector, RejectOutbound, RouterBuilder, SsConnector,
-    Socks5Connector, TrojanConnector, TlsClientSpec, VlessConnector,
+    DirectOutbound, HttpConnectConnector, RejectOutbound, RouterBuilder, Socks5Connector,
+    SsConnector, TlsClientSpec, TrojanConnector, VlessConnector,
 };
-use crate::resolver::hickory::{HickoryDns, SystemResolver};
 use omni_config::wire::{OutboundSpecWire, RuntimeConfigWire};
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -50,13 +50,12 @@ fn tls_obj_and_insecure(ob: &OutboundSpecWire) -> bool {
 }
 
 fn tls_obj_sni(ob: &OutboundSpecWire) -> Option<String> {
-    tls_obj_of(ob)
-        .and_then(|m| {
-            m.get("server_name")
-                .or_else(|| m.get("sni"))
-                .and_then(|s| s.as_str())
-                .map(String::from)
-        })
+    tls_obj_of(ob).and_then(|m| {
+        m.get("server_name")
+            .or_else(|| m.get("sni"))
+            .and_then(|s| s.as_str())
+            .map(String::from)
+    })
 }
 
 fn json_str_arr(v: Option<&serde_json::Value>) -> Vec<String> {
@@ -72,8 +71,14 @@ fn json_str_arr(v: Option<&serde_json::Value>) -> Vec<String> {
 
 fn json_u16_arr(v: Option<&serde_json::Value>) -> Vec<u16> {
     match v {
-        Some(serde_json::Value::Array(a)) => a.iter().filter_map(|x| x.as_u64()).map(|x| x as u16).collect(),
-        Some(serde_json::Value::Number(n)) => n.as_u64().map(|x| vec![x as u16]).unwrap_or_default(),
+        Some(serde_json::Value::Array(a)) => a
+            .iter()
+            .filter_map(|x| x.as_u64())
+            .map(|x| x as u16)
+            .collect(),
+        Some(serde_json::Value::Number(n)) => {
+            n.as_u64().map(|x| vec![x as u16]).unwrap_or_default()
+        }
         _ => Vec::new(),
     }
 }
@@ -109,15 +114,22 @@ fn parse_tls_client_spec(
     })
 }
 
-fn build_connector(ob: &OutboundSpecWire) -> Result<Option<Arc<dyn super::assembly::outbound_artifacts::OutboundConnector>>, String> {
+fn build_connector(
+    ob: &OutboundSpecWire,
+) -> Result<Option<Arc<dyn super::assembly::outbound_artifacts::OutboundConnector>>, String> {
     let target = ob.target.clone().unwrap_or_default();
     let server = target.server.clone().unwrap_or_default();
     let port = target.server_port.unwrap_or_default();
     let get = |k: &str| ob.rest.get(k).and_then(|v| v.as_str()).map(String::from);
     let tls = parse_tls_client_spec(ob.rest.get("tls"), &server);
-    let transport = crate::runtime::assembly::outbound_artifacts::TransportSpec::parse(ob.rest.get("transport"));
-    let mux_pool: Option<Arc<omni_mux::pool::MuxPool>> =
-        ob.rest.get("mux").and_then(|m| m.as_object()).and_then(|m| {
+    let transport = crate::runtime::assembly::outbound_artifacts::TransportSpec::parse(
+        ob.rest.get("transport"),
+    );
+    let mux_pool: Option<Arc<omni_mux::pool::MuxPool>> = ob
+        .rest
+        .get("mux")
+        .and_then(|m| m.as_object())
+        .and_then(|m| {
             let enabled = m.get("enabled").and_then(|b| b.as_bool()).unwrap_or(true);
             if !enabled {
                 return None;
@@ -159,23 +171,28 @@ fn build_connector(ob: &OutboundSpecWire) -> Result<Option<Arc<dyn super::assemb
             transport: transport.clone(),
             mux_pool: mux_pool.clone(),
         }))),
-        "vmess" => Ok(Some(Arc::new(crate::runtime::assembly::outbound_artifacts::VmessConnector {
-            mux_pool: mux_pool.clone(),
-            tag_name: ob.tag.clone(),
-            config: omni_proto::proto::vmess::outbound::VmessOutboundConfig {
-                base: crate::common_alias::TargetedOutboundConfig { server, server_port: port },
-                uuid: get("uuid").unwrap_or_default(),
-                security: ob
-                    .rest
-                    .get("security")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("auto")
-                    .to_string(),
+        "vmess" => Ok(Some(Arc::new(
+            crate::runtime::assembly::outbound_artifacts::VmessConnector {
+                mux_pool: mux_pool.clone(),
+                tag_name: ob.tag.clone(),
+                config: omni_proto::proto::vmess::outbound::VmessOutboundConfig {
+                    base: crate::common_alias::TargetedOutboundConfig {
+                        server,
+                        server_port: port,
+                    },
+                    uuid: get("uuid").unwrap_or_default(),
+                    security: ob
+                        .rest
+                        .get("security")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("auto")
+                        .to_string(),
+                },
+                tls,
             },
-            tls,
-        }))),
-        "hysteria2" | "hy2" => {
-            Ok(Some(Arc::new(crate::runtime::assembly::outbound_artifacts::Hysteria2Connector {
+        ))),
+        "hysteria2" | "hy2" => Ok(Some(Arc::new(
+            crate::runtime::assembly::outbound_artifacts::Hysteria2Connector {
                 conn_pool: Arc::new(tokio::sync::Mutex::new(None)),
                 tag_name: ob.tag.clone(),
                 insecure: tls_obj_and_insecure(ob),
@@ -183,34 +200,40 @@ fn build_connector(ob: &OutboundSpecWire) -> Result<Option<Arc<dyn super::assemb
                 server,
                 port,
                 password: get("password").unwrap_or_default(),
-            })))
-        }
-        "naive" => Ok(Some(Arc::new(crate::runtime::assembly::outbound_artifacts::NaiveConnector {
-            tag_name: ob.tag.clone(),
-            server,
-            port,
-            insecure: tls_obj_and_insecure(ob),
-            sni: tls_obj_sni(ob),
-        }))),
-        "anytls" => Ok(Some(Arc::new(crate::runtime::assembly::outbound_artifacts::AnytlsConnector {
-            tag_name: ob.tag.clone(),
-            tls: parse_tls_client_spec(ob.rest.get("tls"), &server),
-            session_pool: Arc::new(tokio::sync::Mutex::new(None)),
-            insecure: tls_obj_and_insecure(ob),
-            sni: tls_obj_sni(ob),
-            server,
-            port,
-            password: get("password").unwrap_or_default(),
-        }))),
-        "mieru" => Ok(Some(Arc::new(crate::runtime::assembly::outbound_artifacts::MieruConnector {
-            tag_name: ob.tag.clone(),
-            config: omni_proto::proto::mieru::outbound::MieruOutboundConfig {
+            },
+        ))),
+        "naive" => Ok(Some(Arc::new(
+            crate::runtime::assembly::outbound_artifacts::NaiveConnector {
+                tag_name: ob.tag.clone(),
                 server,
                 port,
-                username: get("username").unwrap_or_default(),
+                insecure: tls_obj_and_insecure(ob),
+                sni: tls_obj_sni(ob),
+            },
+        ))),
+        "anytls" => Ok(Some(Arc::new(
+            crate::runtime::assembly::outbound_artifacts::AnytlsConnector {
+                tag_name: ob.tag.clone(),
+                tls: parse_tls_client_spec(ob.rest.get("tls"), &server),
+                session_pool: Arc::new(tokio::sync::Mutex::new(None)),
+                insecure: tls_obj_and_insecure(ob),
+                sni: tls_obj_sni(ob),
+                server,
+                port,
                 password: get("password").unwrap_or_default(),
             },
-        }))),
+        ))),
+        "mieru" => Ok(Some(Arc::new(
+            crate::runtime::assembly::outbound_artifacts::MieruConnector {
+                tag_name: ob.tag.clone(),
+                config: omni_proto::proto::mieru::outbound::MieruOutboundConfig {
+                    server,
+                    port,
+                    username: get("username").unwrap_or_default(),
+                    password: get("password").unwrap_or_default(),
+                },
+            },
+        ))),
         "socks" | "socks5" => Ok(Some(Arc::new(Socks5Connector {
             tag_name: ob.tag.clone(),
             config: omni_proto::proto::socks::client::SocksOutboundConfig {
@@ -267,9 +290,9 @@ impl CoreRuntime {
 
         let resolver_arc: Arc<dyn omni_domain::ports::resolver::Resolver> =
             match wire.dns.as_ref().and_then(|d| d.default_dns.clone()) {
-                Some(servers) if !servers.is_empty() => Arc::new(
-                    HickoryDns::new(&servers).map_err(CoreError::Assembly)?,
-                ),
+                Some(servers) if !servers.is_empty() => {
+                    Arc::new(HickoryDns::new(&servers).map_err(CoreError::Assembly)?)
+                }
                 _ => Arc::new(SystemResolver),
             };
         let dialer = Arc::new(omni_transport::dial::Dialer::new(resolver_arc));
@@ -364,7 +387,11 @@ impl CoreRuntime {
             tasks.extend(set.tasks);
 
             for plan in &self.plans {
-                if let crate::runtime::assembly::node_builder::InboundProto::Hysteria2 { password, tls } = &plan.proto {
+                if let crate::runtime::assembly::node_builder::InboundProto::Hysteria2 {
+                    password,
+                    tls,
+                } = &plan.proto
+                {
                     for addr in &plan.listen_addrs {
                         let shared = self.shared_for(&plan.tag);
                         let tls_material = match tls {
@@ -400,13 +427,12 @@ impl CoreRuntime {
                                 .run(move |stream, addr| {
                                     let shared = shared2.clone();
                                     async move {
-                                        let target =
-                                            parse_hy_addr(&addr).unwrap_or_else(|| {
-                                                omni_domain::stream::ProxyTarget::Domain(
-                                                    String::new(),
-                                                    0,
-                                                )
-                                            });
+                                        let target = parse_hy_addr(&addr).unwrap_or_else(|| {
+                                            omni_domain::stream::ProxyTarget::Domain(
+                                                String::new(),
+                                                0,
+                                            )
+                                        });
                                         crate::runtime::assembly::listener_executor::run_tcp_route(
                                             shared,
                                             stream,
@@ -461,13 +487,17 @@ fn load_geo_files(geo: &GeoRegistry, wire: &RuntimeConfigWire) {
     if let Some(extra) = wire.extra.get("geosite_path").and_then(|v| v.as_str()) {
         match geo.load_dat(extra) {
             Ok(_) => loaded_any = true,
-            Err(e) => tracing::warn!(target: "internal.geo", "geosite load failed path={} error={}", extra, e),
+            Err(e) => {
+                tracing::warn!(target: "internal.geo", "geosite load failed path={} error={}", extra, e)
+            }
         }
     }
     if let Some(extra) = wire.extra.get("geoip_path").and_then(|v| v.as_str()) {
         match geo.load_dat(extra) {
             Ok(_) => loaded_any = true,
-            Err(e) => tracing::warn!(target: "internal.geo", "geoip load failed path={} error={}", extra, e),
+            Err(e) => {
+                tracing::warn!(target: "internal.geo", "geoip load failed path={} error={}", extra, e)
+            }
         }
     }
     let _ = loaded_any;
@@ -490,7 +520,10 @@ fn parse_hy_addr(addr: &str) -> Option<omni_domain::stream::ProxyTarget> {
             std::net::SocketAddr::new(ip, port),
         ))
     } else {
-        Some(omni_domain::stream::ProxyTarget::Domain(h.to_string(), port))
+        Some(omni_domain::stream::ProxyTarget::Domain(
+            h.to_string(),
+            port,
+        ))
     }
 }
 
@@ -501,18 +534,17 @@ pub(crate) fn parse_naive_authority(authority: &str) -> omni_domain::stream::Pro
         let rest = &a[idx + 1..];
         let port = rest.trim_start_matches(':').parse().unwrap_or(443);
         if let Ok(ip) = host.parse() {
-            return omni_domain::stream::ProxyTarget::Tcp(
-                std::net::SocketAddr::new(ip, port),
-            );
+            return omni_domain::stream::ProxyTarget::Tcp(std::net::SocketAddr::new(ip, port));
         }
         return omni_domain::stream::ProxyTarget::Domain(host.to_string(), port);
     }
     match a.rsplit_once(':') {
         Some((h, p)) => {
             if let Ok(ip) = h.parse() {
-                omni_domain::stream::ProxyTarget::Tcp(
-                    std::net::SocketAddr::new(ip, p.parse().unwrap_or(443)),
-                )
+                omni_domain::stream::ProxyTarget::Tcp(std::net::SocketAddr::new(
+                    ip,
+                    p.parse().unwrap_or(443),
+                ))
             } else {
                 omni_domain::stream::ProxyTarget::Domain(h.to_string(), p.parse().unwrap_or(443))
             }

@@ -1,7 +1,7 @@
-use crate::common::TargetedOutboundConfig;
-use omni_domain::stream::ProxyTarget;
 use super::decode_tcp_response;
 use super::encode_tcp_request;
+use crate::common::TargetedOutboundConfig;
+use omni_domain::stream::ProxyTarget;
 use quinn::Connection as QuinnConnection;
 use std::io;
 use std::pin::Pin;
@@ -24,7 +24,7 @@ pub struct Hysteria2Conn {
 }
 
 fn io_err(e: impl std::fmt::Display) -> io::Error {
-    io::Error::other( format!("hysteria2: {}", e))
+    io::Error::other(format!("hysteria2: {}", e))
 }
 
 async fn h3_auth(
@@ -62,7 +62,10 @@ async fn h3_auth(
 }
 
 impl Hysteria2Conn {
-    pub async fn connect(cfg: &Hysteria2OutboundConfig, addr: std::net::SocketAddr) -> io::Result<Self> {
+    pub async fn connect(
+        cfg: &Hysteria2OutboundConfig,
+        addr: std::net::SocketAddr,
+    ) -> io::Result<Self> {
         omni_transport::tls::init_crypto_provider();
 
         let builder = rustls::ClientConfig::builder_with_provider(provider())
@@ -71,9 +74,7 @@ impl Hysteria2Conn {
         let mut client_cfg = if cfg.insecure {
             builder
                 .dangerous()
-                .with_custom_certificate_verifier(Arc::new(
-                    omni_transport::tls::NoVerifier,
-                ))
+                .with_custom_certificate_verifier(Arc::new(omni_transport::tls::NoVerifier))
                 .with_no_client_auth()
         } else {
             builder
@@ -82,11 +83,10 @@ impl Hysteria2Conn {
         };
         client_cfg.alpn_protocols = vec![b"h3".to_vec()];
 
-        let mut quinn_client_cfg =
-            quinn::ClientConfig::new(std::sync::Arc::new(
-                quinn::crypto::rustls::QuicClientConfig::try_from(client_cfg)
-                    .map_err(|e| io_err(e.to_string()))?,
-            ));
+        let mut quinn_client_cfg = quinn::ClientConfig::new(std::sync::Arc::new(
+            quinn::crypto::rustls::QuicClientConfig::try_from(client_cfg)
+                .map_err(|e| io_err(e.to_string()))?,
+        ));
         let mut transport = quinn::TransportConfig::default();
         transport.max_idle_timeout(Some(
             quinn::IdleTimeout::try_from(std::time::Duration::from_secs(30))
@@ -96,8 +96,7 @@ impl Hysteria2Conn {
         transport.datagram_send_buffer_size(65535);
         quinn_client_cfg.transport_config(std::sync::Arc::new(transport));
 
-        let mut endpoint = quinn::Endpoint::client("0.0.0.0:0".parse().unwrap())
-            .map_err(io_err)?;
+        let mut endpoint = quinn::Endpoint::client("0.0.0.0:0".parse().unwrap()).map_err(io_err)?;
         endpoint.set_default_client_config(quinn_client_cfg);
 
         let sni = cfg.sni.clone().unwrap_or_else(|| "hysteria".to_string());
@@ -111,7 +110,10 @@ impl Hysteria2Conn {
 
         tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
-        Ok(Hysteria2Conn { conn, _h3_keepalive: h3_keepalive })
+        Ok(Hysteria2Conn {
+            conn,
+            _h3_keepalive: h3_keepalive,
+        })
     }
 
     pub async fn open_tcp(&self, target_host: &str, target_port: u16) -> io::Result<QuinnStream> {
@@ -124,7 +126,11 @@ impl Hysteria2Conn {
         let req = encode_tcp_request(&addr_str);
         send.write_all(&req).await.map_err(io_err)?;
         let mut resp_buf = vec![0u8; 512];
-        let n = recv.read(&mut resp_buf).await.map_err(io_err)?.ok_or_else(|| io_err("closed"))?;
+        let n = recv
+            .read(&mut resp_buf)
+            .await
+            .map_err(io_err)?
+            .ok_or_else(|| io_err("closed"))?;
         resp_buf.truncate(n);
         let (ok, msg) = decode_tcp_response(&resp_buf)?;
         tracing::debug!(target: "internal.pipeline", "hysteria2 outbound tcp resp ok={} msg={}", ok, msg);

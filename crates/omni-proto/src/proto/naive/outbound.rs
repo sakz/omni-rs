@@ -20,6 +20,8 @@ where
         omni_domain::stream::ProxyTarget::Domain(h, p) => format!("{}:{}", h, p),
         omni_domain::stream::ProxyTarget::Tcp(a) => a.to_string(),
     };
-    let stream = conn.open_proxy_stream("CONNECT", "/", &authority, "").await?;
+    let stream = conn
+        .open_proxy_stream("CONNECT", "/", &authority, "")
+        .await?;
     Ok(omni_domain::stream::boxed(stream))
 }

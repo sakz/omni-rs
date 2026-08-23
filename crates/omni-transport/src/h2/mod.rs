@@ -1,9 +1,7 @@
 use bytes::Bytes;
 
 pub type StreamFuture = Pin<Box<dyn std::future::Future<Output = io::Result<()>> + Send>>;
-pub type StreamHandler = std::sync::Arc<
-    dyn Fn(BoxProxyStream) -> StreamFuture + Send + Sync,
->;
+pub type StreamHandler = std::sync::Arc<dyn Fn(BoxProxyStream) -> StreamFuture + Send + Sync>;
 use omni_domain::stream::{BoxProxyStream, ProxyTarget};
 use std::io;
 use std::pin::Pin;
@@ -11,7 +9,7 @@ use std::task::{Context, Poll};
 use tokio::io::{AsyncRead, AsyncWrite};
 
 pub fn ioerr(msg: &str) -> io::Error {
-    io::Error::other( format!("h2: {}", msg))
+    io::Error::other(format!("h2: {}", msg))
 }
 
 pub struct H2Stream {
@@ -151,14 +149,9 @@ where
             .send_request(req, false)
             .map_err(|e| ioerr(&e.to_string()))?;
 
-        let resp = resp_fut
-            .await
-            .map_err(|e| ioerr(&e.to_string()))?;
+        let resp = resp_fut.await.map_err(|e| ioerr(&e.to_string()))?;
         if !resp.status().is_success() {
-            return Err(ioerr(&format!(
-                "upstream responded {}",
-                resp.status()
-            )));
+            return Err(ioerr(&format!("upstream responded {}", resp.status())));
         }
         Ok(H2Stream::new(send_stream, resp.into_body()))
     }
@@ -177,7 +170,6 @@ pub async fn serve_requests<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-
     let mut conn = h2::server::handshake(io)
         .await
         .map_err(|e| ioerr(&e.to_string()))?;
@@ -195,10 +187,7 @@ where
             let path = request.uri().path().to_string();
             if let Some(prefix) = &prefix {
                 if !path.starts_with(prefix.as_str()) && normalize(&path) != normalize(prefix) {
-                    let resp = http::Response::builder()
-                        .status(404)
-                        .body(())
-                        .unwrap();
+                    let resp = http::Response::builder().status(404).body(()).unwrap();
                     let _ = respond.send_response(resp, true);
                     return;
                 }
@@ -244,13 +233,17 @@ pub fn target_from_authority_or_default(
     default_target.clone()
 }
 
-pub async fn serve_connect<S, F>(
-    io: S,
-    on_connect: F,
-) -> io::Result<()>
+pub async fn serve_connect<S, F>(io: S, on_connect: F) -> io::Result<()>
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
-    F: Fn(BoxProxyStream, String) -> Pin<Box<dyn std::future::Future<Output = io::Result<()>> + Send>> + Send + Sync + Clone + 'static,
+    F: Fn(
+            BoxProxyStream,
+            String,
+        ) -> Pin<Box<dyn std::future::Future<Output = io::Result<()>> + Send>>
+        + Send
+        + Sync
+        + Clone
+        + 'static,
 {
     let mut conn = h2::server::handshake(io)
         .await
@@ -264,29 +257,20 @@ where
         let on_connect = on_connect.clone();
         tokio::spawn(async move {
             if request.method() != http::Method::CONNECT {
-                let resp = http::Response::builder()
-                    .status(405)
-                    .body(())
-                    .unwrap();
+                let resp = http::Response::builder().status(405).body(()).unwrap();
                 let _ = respond.send_response(resp, true);
                 return;
             }
             let authority = match request.uri().authority() {
                 Some(a) => a.to_string(),
                 None => {
-                    let resp = http::Response::builder()
-                        .status(400)
-                        .body(())
-                        .unwrap();
+                    let resp = http::Response::builder().status(400).body(()).unwrap();
                     let _ = respond.send_response(resp, true);
                     return;
                 }
             };
 
-            let response = http::Response::builder()
-                .status(200)
-                .body(())
-                .unwrap();
+            let response = http::Response::builder().status(200).body(()).unwrap();
             let send = match respond.send_response(response, false) {
                 Ok(s) => s,
                 Err(_) => return,

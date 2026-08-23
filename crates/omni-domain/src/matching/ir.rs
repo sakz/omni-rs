@@ -14,9 +14,7 @@ impl DomainPattern {
         let d = domain.to_ascii_lowercase();
         match self {
             DomainPattern::Full(f) => &d == f,
-            DomainPattern::Suffix(s) => {
-                d == *s || d.ends_with(&format!(".{}", s))
-            }
+            DomainPattern::Suffix(s) => d == *s || d.ends_with(&format!(".{}", s)),
             DomainPattern::Keyword(k) => d.contains(k),
             DomainPattern::Regex(r) => r.is_match(&d),
         }
@@ -118,14 +116,8 @@ impl IpMatcher {
 
     pub fn matches(&self, ip: std::net::IpAddr) -> bool {
         match ip {
-            std::net::IpAddr::V4(a) => self
-                .v4
-                .iter()
-                .any(|(n, l)| mask4(a, *n, *l)),
-            std::net::IpAddr::V6(a) => self
-                .v6
-                .iter()
-                .any(|(n, l)| mask6(a, *n, *l)),
+            std::net::IpAddr::V4(a) => self.v4.iter().any(|(n, l)| mask4(a, *n, *l)),
+            std::net::IpAddr::V6(a) => self.v6.iter().any(|(n, l)| mask6(a, *n, *l)),
         }
     }
 

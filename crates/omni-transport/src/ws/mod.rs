@@ -56,7 +56,8 @@ pub mod sha1 {
                     2 => ((b & c) | (b & d) | (c & d), 0x8F1BBCDC),
                     _ => (b ^ c ^ d, 0xCA62C1D6),
                 };
-                let tmp = a.rotate_left(5)
+                let tmp = a
+                    .rotate_left(5)
                     .wrapping_add(f)
                     .wrapping_add(e)
                     .wrapping_add(k)
@@ -105,7 +106,7 @@ fn accept_key(key: &str) -> String {
 }
 
 fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::other( msg)
+    std::io::Error::other(msg)
 }
 
 #[derive(Debug, Clone, Default)]
@@ -239,10 +240,17 @@ where
         ProxyTarget::Domain(h, _) => h.clone(),
         ProxyTarget::Tcp(a) => a.ip().to_string(),
     };
-    let url = format!("ws://{}:{}{}", addr_host, port_hint, spec.path.clone().unwrap_or_else(|| "/".into()));
+    let url = format!(
+        "ws://{}:{}{}",
+        addr_host,
+        port_hint,
+        spec.path.clone().unwrap_or_else(|| "/".into())
+    );
     let mut req = url.into_client_request().map_err(ws_err)?;
-    req.headers_mut()
-        .insert("Host", host.parse().map_err(|_| ioerr("ws: bad host header"))?);
+    req.headers_mut().insert(
+        "Host",
+        host.parse().map_err(|_| ioerr("ws: bad host header"))?,
+    );
     let (ws, _resp) = tokio_tungstenite::client_async(req, tcp)
         .await
         .map_err(ws_err)?;
@@ -250,7 +258,7 @@ where
 }
 
 fn ws_err(e: tokio_tungstenite::tungstenite::Error) -> std::io::Error {
-    std::io::Error::other( format!("ws: {}", e))
+    std::io::Error::other(format!("ws: {}", e))
 }
 
 pub struct WsProxyStream<S> {
@@ -295,9 +303,7 @@ where
                     Message::Ping(_) | Message::Pong(_) | Message::Frame(_) => {}
                 },
                 Poll::Ready(Some(Err(e))) => {
-                    return Poll::Ready(Err(std::io::Error::other(
-                        format!("ws: {}", e),
-                    )))
+                    return Poll::Ready(Err(std::io::Error::other(format!("ws: {}", e))))
                 }
                 Poll::Ready(None) => return Poll::Ready(Ok(())),
                 Poll::Pending => return Poll::Pending,
@@ -349,16 +355,12 @@ where
         use futures_util::Sink;
         match Pin::new(&mut self.inner).poll_close(cx) {
             Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
-            Poll::Ready(Err(e)) => Poll::Ready(Err(std::io::Error::other(
-                format!("ws: {}", e),
-            ))),
+            Poll::Ready(Err(e)) => Poll::Ready(Err(std::io::Error::other(format!("ws: {}", e)))),
             Poll::Pending => Poll::Pending,
         }
     }
 }
 
 fn ws_poll_err(e: tungstenite::Error) -> Poll<std::io::Result<()>> {
-    Poll::Ready(Err(std::io::Error::other(
-        format!("ws: {}", e),
-    )))
+    Poll::Ready(Err(std::io::Error::other(format!("ws: {}", e))))
 }

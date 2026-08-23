@@ -1,4 +1,7 @@
-use omni_domain::socks5::{self, read_greeting, read_request, write_method_choice, write_reply, Command, Method, Socks5Addr};
+use omni_domain::socks5::{
+    self, read_greeting, read_request, write_method_choice, write_reply, Command, Method,
+    Socks5Addr,
+};
 use omni_domain::stream::{ProxyStream, ProxyTarget};
 use tokio::io::AsyncWriteExt;
 
@@ -9,13 +12,8 @@ pub struct SocksInboundConfig {
 }
 
 pub enum Accepted<S> {
-    Tcp {
-        target: ProxyTarget,
-        stream: S,
-    },
-    UdpAssociate {
-        stream: S,
-    },
+    Tcp { target: ProxyTarget, stream: S },
+    UdpAssociate { stream: S },
 }
 
 pub async fn handshake<S>(mut stream: S, cfg: &SocksInboundConfig) -> std::io::Result<Accepted<S>>
@@ -39,9 +37,12 @@ where
         if hdr[0] != 0x01 {
             return Err(socks5::io_err("socks5: bad subnegotiation version"));
         }
-        let user = String::from_utf8_lossy(&socks5::read_exact(&mut stream, hdr[1] as usize).await?).to_string();
+        let user =
+            String::from_utf8_lossy(&socks5::read_exact(&mut stream, hdr[1] as usize).await?)
+                .to_string();
         let plen = socks5::read_exact(&mut stream, 1).await?[0] as usize;
-        let pass = String::from_utf8_lossy(&socks5::read_exact(&mut stream, plen).await?).to_string();
+        let pass =
+            String::from_utf8_lossy(&socks5::read_exact(&mut stream, plen).await?).to_string();
         let ok = cfg.username.as_deref() == Some(user.as_str())
             && cfg.password.as_deref() == Some(pass.as_str());
         stream.write_all(&[0x01, u8::from(!ok)]).await?;
@@ -117,7 +118,9 @@ pub mod client {
             return Ok(std::net::SocketAddr::new(a, port));
         }
         let mut addrs = tokio::net::lookup_host((host, port)).await?;
-        addrs.next().ok_or_else(|| socks5::io_err("dns: no address records found"))
+        addrs
+            .next()
+            .ok_or_else(|| socks5::io_err("dns: no address records found"))
     }
 
     async fn negotiate(stream: &mut TcpStream, cfg: &SocksOutboundConfig) -> std::io::Result<()> {
@@ -125,7 +128,9 @@ pub mod client {
         if cfg.username.is_some() {
             methods.insert(0, 0x02);
         }
-        stream.write_all(&[socks5::VER, methods.len() as u8]).await?;
+        stream
+            .write_all(&[socks5::VER, methods.len() as u8])
+            .await?;
         stream.write_all(&methods).await?;
         let resp = socks5::read_exact(stream, 2).await?;
         if resp[0] != socks5::VER {
@@ -161,9 +166,10 @@ pub mod client {
         stream.write_all(&req).await?;
         let head = socks5::read_exact(stream, 4).await?;
         if head[1] != socks5::REP_SUCCEEDED {
-            return Err(std::io::Error::other(
-                format!("socks5: connect refused rep=0x{:02x}", head[1]),
-            ));
+            return Err(std::io::Error::other(format!(
+                "socks5: connect refused rep=0x{:02x}",
+                head[1]
+            )));
         }
         let (bind, used) = Socks5Addr::decode(&head[3..])
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
@@ -179,7 +185,12 @@ pub mod client {
     ) -> std::io::Result<TcpStream> {
         let mut s = dial_server(cfg).await?;
         negotiate(&mut s, cfg).await?;
-        request(&mut s, Command::Connect, &Socks5Addr::from_proxy_target(target)).await?;
+        request(
+            &mut s,
+            Command::Connect,
+            &Socks5Addr::from_proxy_target(target),
+        )
+        .await?;
         Ok(s)
     }
 
@@ -197,8 +208,14 @@ pub mod client {
         {
             let bind_port = udp_relay_port(&bind);
             let server_addr = resolve_sock_addr(&cfg.server, cfg.server_port).await?;
-            let ip = if bind_ip.is_unspecified() { server_addr.ip() } else { bind_ip };
-            local.connect(std::net::SocketAddr::new(ip, bind_port)).await?;
+            let ip = if bind_ip.is_unspecified() {
+                server_addr.ip()
+            } else {
+                bind_ip
+            };
+            local
+                .connect(std::net::SocketAddr::new(ip, bind_port))
+                .await?;
         }
 
         let (tx_out, mut rx_out) = mpsc::channel::<UdpPacket>(256);

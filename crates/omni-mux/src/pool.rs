@@ -16,8 +16,7 @@ struct Entry {
     active: Arc<AtomicUsize>,
 }
 
-pub type ConnectFn<'a> =
-    Pin<Box<dyn Future<Output = io::Result<BoxProxyStream>> + Send + 'a>>;
+pub type ConnectFn<'a> = Pin<Box<dyn Future<Output = io::Result<BoxProxyStream>> + Send + 'a>>;
 
 pub struct MuxPool {
     kind: MuxKind,
@@ -123,17 +122,11 @@ impl AsyncWrite for PooledStream {
         Pin::new(&mut self.inner).poll_write(cx, buf)
     }
 
-    fn poll_flush(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.inner).poll_flush(cx)
     }
 
-    fn poll_shutdown(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.inner).poll_shutdown(cx)
     }
 }

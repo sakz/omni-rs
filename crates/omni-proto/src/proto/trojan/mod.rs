@@ -14,7 +14,7 @@ pub fn password_hash(password: &str) -> String {
 }
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::other( msg)
+    std::io::Error::other(msg)
 }
 
 async fn read_n<S>(stream: &mut S, n: usize) -> std::io::Result<Vec<u8>>

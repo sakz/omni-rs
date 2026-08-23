@@ -3,7 +3,7 @@ use tracing_core::field::{Field, Visit};
 use tracing_core::{Event, Level, Subscriber};
 use tracing_subscriber::fmt::format::Writer;
 use tracing_subscriber::fmt::time::FormatTime;
-use tracing_subscriber::fmt::{FormatEvent, FmtContext};
+use tracing_subscriber::fmt::{FmtContext, FormatEvent};
 use tracing_subscriber::registry::LookupSpan;
 
 pub struct OmniTimer;

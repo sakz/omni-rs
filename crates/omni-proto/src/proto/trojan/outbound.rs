@@ -69,11 +69,7 @@ where
         )
     }
 
-    pub async fn send_to(
-        &mut self,
-        target: &ProxyTarget,
-        data: &[u8],
-    ) -> std::io::Result<()> {
+    pub async fn send_to(&mut self, target: &ProxyTarget, data: &[u8]) -> std::io::Result<()> {
         let frame = udp_frame::encode(&Socks5Addr::from_proxy_target(target), data);
         self.stream.write_all(&frame).await
     }

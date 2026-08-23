@@ -149,10 +149,7 @@ impl Socks5Addr {
     }
 }
 
-pub async fn read_exact<S: AsyncRead + Unpin>(
-    s: &mut S,
-    n: usize,
-) -> std::io::Result<Vec<u8>> {
+pub async fn read_exact<S: AsyncRead + Unpin>(s: &mut S, n: usize) -> std::io::Result<Vec<u8>> {
     let mut v = vec![0u8; n];
     s.read_exact(&mut v).await?;
     Ok(v)
@@ -193,10 +190,9 @@ pub async fn read_request<S: AsyncRead + Unpin>(
             "socks5: unsupported version",
         ));
     }
-    let cmd =
-        Command::from_u8(head[1]).ok_or_else(|| {
-            std::io::Error::new(std::io::ErrorKind::InvalidData, "socks5: unknown command")
-        })?;
+    let cmd = Command::from_u8(head[1]).ok_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::InvalidData, "socks5: unknown command")
+    })?;
     let atyp = head[3];
     let addr = match atyp {
         0x01 => {
@@ -250,7 +246,7 @@ pub async fn write_reply<S: AsyncWrite + Unpin>(
 }
 
 pub fn io_err(msg: &'static str) -> std::io::Error {
-std::io::Error::other(msg)
+    std::io::Error::other(msg)
 }
 
 #[cfg(test)]

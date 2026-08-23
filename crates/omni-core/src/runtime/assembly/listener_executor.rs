@@ -40,9 +40,7 @@ pub async fn spawn_listeners(
                             let plan = plan.clone();
                             let shared = shared.clone();
                             tokio::spawn(async move {
-                                if let Err(e) =
-                                    handle_stream(plan, shared, sock, peer).await
-                                {
+                                if let Err(e) = handle_stream(plan, shared, sock, peer).await {
                                     tracing::debug!(
                                         target: "internal.pipeline",
                                         "stream ended error={}", e
@@ -127,14 +125,12 @@ async fn handle_stream(
                 None => omni_domain::stream::boxed(sock),
             };
             let shared2 = shared.clone();
-            let handler: omni_transport::h2::StreamHandler =
-                Arc::new(move |s: BoxProxyStream| {
-                    let shared = shared2.clone();
-                    let proto = plan_proto.clone();
-                    Box::pin(async move { run_proto_pipeline(shared, &proto, s).await })
-                });
-            omni_transport::grpc::serve(stream, service, handler)
-            .await?;
+            let handler: omni_transport::h2::StreamHandler = Arc::new(move |s: BoxProxyStream| {
+                let shared = shared2.clone();
+                let proto = plan_proto.clone();
+                Box::pin(async move { run_proto_pipeline(shared, &proto, s).await })
+            });
+            omni_transport::grpc::serve(stream, service, handler).await?;
             return Ok(());
         }
         (_, WrapTransport::H2 { path, .. }) => {
@@ -143,19 +139,15 @@ async fn handle_stream(
                 None => omni_domain::stream::boxed(sock),
             };
             let shared2 = shared.clone();
-            omni_transport::h2::serve_requests(
-                stream,
-                path.clone(),
-                {
-                    let handler: omni_transport::h2::StreamHandler =
-                        Arc::new(move |s: BoxProxyStream| {
-                            let shared = shared2.clone();
-                            let proto = plan_proto.clone();
-                            Box::pin(async move { run_proto_pipeline(shared, &proto, s).await })
-                        });
-                    handler
-                },
-            )
+            omni_transport::h2::serve_requests(stream, path.clone(), {
+                let handler: omni_transport::h2::StreamHandler =
+                    Arc::new(move |s: BoxProxyStream| {
+                        let shared = shared2.clone();
+                        let proto = plan_proto.clone();
+                        Box::pin(async move { run_proto_pipeline(shared, &proto, s).await })
+                    });
+                handler
+            })
             .await?;
             return Ok(());
         }
@@ -189,10 +181,10 @@ async fn handle_stream(
     shared.counters.add_conn();
     tracing::debug!(target: "internal.pipeline", "conn accepted inbound={} peer={}", plan.tag, peer);
 
-    if matches!(plan.proto, InboundProto::Anytls { .. }) && !matches!(plan.wrap, WrapTransport::None) {
-        return Err(std::io::Error::other(
-            "anytls requires bare TLS transport",
-        ));
+    if matches!(plan.proto, InboundProto::Anytls { .. })
+        && !matches!(plan.wrap, WrapTransport::None)
+    {
+        return Err(std::io::Error::other("anytls requires bare TLS transport"));
     }
 
     if let Some(mux_kind) = plan.inbound_mux {
@@ -231,31 +223,38 @@ async fn handle_stream(
             let cfg = omni_proto::proto::anytls::inbound::ServerConfig {
                 password: password.clone(),
             };
-            let route: omni_proto::proto::anytls::server::RouteCallback =
-                Arc::new(move |stream, target| {
+            let route: omni_proto::proto::anytls::server::RouteCallback = Arc::new(
+                move |stream, target| {
                     let shared = shared.clone();
                     tokio::spawn(async move {
-                        if let Err(e) =
-                            crate::runtime::assembly::listener_executor::run_tcp_route(
-                                shared,
-                                Box::new(stream),
-                                target,
-                                Vec::new(),
-                                None,
-                            )
-                            .await
+                        if let Err(e) = crate::runtime::assembly::listener_executor::run_tcp_route(
+                            shared,
+                            Box::new(stream),
+                            target,
+                            Vec::new(),
+                            None,
+                        )
+                        .await
                         {
                             tracing::debug!(target: "internal.pipeline", "anytls stream ended error={}", e);
                         }
                     });
-                });
+                },
+            );
             omni_proto::proto::anytls::inbound::accept_session(stream, &cfg, route).await
         }
         InboundProto::Socks(cfg) => {
             use omni_proto::proto::socks::Accepted;
             match omni_proto::proto::socks::handshake(stream, cfg).await? {
                 Accepted::Tcp { target, stream } => {
-                    run_tcp_route(shared, omni_domain::stream::boxed(stream), target, Vec::new(), None).await
+                    run_tcp_route(
+                        shared,
+                        omni_domain::stream::boxed(stream),
+                        target,
+                        Vec::new(),
+                        None,
+                    )
+                    .await
                 }
                 Accepted::UdpAssociate { stream } => {
                     handle_socks_udp(shared, omni_domain::stream::boxed(stream)).await
@@ -269,7 +268,14 @@ async fn handle_stream(
             };
             match omni_proto::proto::trojan::inbound::handshake(stream, &cfg).await? {
                 Accepted::Tcp { target, stream } => {
-                    run_tcp_route(shared, omni_domain::stream::boxed(stream), target, Vec::new(), None).await
+                    run_tcp_route(
+                        shared,
+                        omni_domain::stream::boxed(stream),
+                        target,
+                        Vec::new(),
+                        None,
+                    )
+                    .await
                 }
                 Accepted::UdpAssociate { stream } => {
                     handle_trojan_udp(shared, omni_domain::stream::boxed(stream)).await
@@ -280,18 +286,19 @@ async fn handle_stream(
             let cfg = omni_proto::proto::vmess::inbound::VmessInboundConfig {
                 users: uuids.clone(),
             };
-            let acc = omni_proto::proto::vmess::inbound::handshake(stream, &cfg).await.map_err(|e| {
-                tracing::warn!(target: "internal.pipeline", "vmess handshake failed: {}", e);
-                e
-            })?;
-            let duplex = crate::runtime::assembly::outbound_artifacts::vmess_duplex(acc.reader, acc.writer);
+            let acc = omni_proto::proto::vmess::inbound::handshake(stream, &cfg)
+                .await
+                .map_err(|e| {
+                    tracing::warn!(target: "internal.pipeline", "vmess handshake failed: {}", e);
+                    e
+                })?;
+            let duplex =
+                crate::runtime::assembly::outbound_artifacts::vmess_duplex(acc.reader, acc.writer);
             run_tcp_route(shared, duplex, acc.target, Vec::new(), None).await
         }
-        InboundProto::Hysteria2 { .. } => {
-            Err(std::io::Error::other(
-                "hysteria2 inbound must run on the QUIC listener path",
-            ))
-        }
+        InboundProto::Hysteria2 { .. } => Err(std::io::Error::other(
+            "hysteria2 inbound must run on the QUIC listener path",
+        )),
         InboundProto::Shadowsocks(cfg) => {
             let (mut reader, writer) =
                 omni_proto::proto::shadowsocks::inbound::accept_tcp(stream, cfg).await?;
@@ -332,19 +339,12 @@ pub(crate) async fn run_tcp_route(
     pre_read: Vec<u8>,
     user: Option<String>,
 ) -> std::io::Result<()> {
-    let sniffed = inspector::inspect_stream(
-        &mut stream,
-        std::time::Duration::from_millis(150),
-    )
-    .await;
+    let sniffed =
+        inspector::inspect_stream(&mut stream, std::time::Duration::from_millis(150)).await;
 
     let host_owned: Option<String> = sniffed.host.clone().or_else(|| domain_of(&target));
-    let action = pipe_exec::resolve_action(
-        &shared,
-        &target,
-        host_owned.as_deref(),
-        &shared.inbound_tag,
-    );
+    let action =
+        pipe_exec::resolve_action(&shared, &target, host_owned.as_deref(), &shared.inbound_tag);
 
     let mut pre = pre_read;
     pre.extend_from_slice(&sniffed.consumed);
@@ -359,10 +359,7 @@ fn domain_of(t: &omni_domain::stream::ProxyTarget) -> Option<String> {
     }
 }
 
-async fn handle_socks_udp(
-    shared: PipelineShared,
-    control: BoxProxyStream,
-) -> std::io::Result<()> {
+async fn handle_socks_udp(shared: PipelineShared, control: BoxProxyStream) -> std::io::Result<()> {
     let bind_ip: std::net::IpAddr = "0.0.0.0".parse().unwrap();
     let sock = tokio::net::UdpSocket::bind((bind_ip, 0)).await?;
     let local = sock.local_addr()?;
@@ -415,8 +412,14 @@ pub(crate) async fn run_proto_pipeline(
             use omni_proto::proto::socks::Accepted;
             match omni_proto::proto::socks::handshake(stream, cfg).await? {
                 Accepted::Tcp { target, stream } => {
-                    run_tcp_route(shared, omni_domain::stream::boxed(stream), target, Vec::new(), None)
-                        .await
+                    run_tcp_route(
+                        shared,
+                        omni_domain::stream::boxed(stream),
+                        target,
+                        Vec::new(),
+                        None,
+                    )
+                    .await
                 }
                 _ => Err(std::io::Error::new(
                     std::io::ErrorKind::Unsupported,
@@ -431,20 +434,27 @@ pub(crate) async fn run_proto_pipeline(
             };
             match omni_proto::proto::trojan::inbound::handshake(stream, &cfg).await? {
                 Accepted::Tcp { target, stream } => {
-                    run_tcp_route(shared, omni_domain::stream::boxed(stream), target, Vec::new(), None)
-                        .await
+                    run_tcp_route(
+                        shared,
+                        omni_domain::stream::boxed(stream),
+                        target,
+                        Vec::new(),
+                        None,
+                    )
+                    .await
                 }
-                Accepted::UdpAssociate { .. } => Err(super::super::super::runtime::assembly::node_builder::io_err_pub(
-                    "trojan UDP not supported on multiplexed transports",
-                )),
+                Accepted::UdpAssociate { .. } => Err(
+                    super::super::super::runtime::assembly::node_builder::io_err_pub(
+                        "trojan UDP not supported on multiplexed transports",
+                    ),
+                ),
             }
         }
         InboundProto::Shadowsocks(cfg) => {
             let (mut reader, writer) =
                 omni_proto::proto::shadowsocks::inbound::accept_tcp(stream, cfg).await?;
             let target = reader.read_target().await?;
-            let duplex =
-                crate::runtime::assembly::outbound_artifacts::ss_duplex(reader, writer);
+            let duplex = crate::runtime::assembly::outbound_artifacts::ss_duplex(reader, writer);
             run_tcp_route(shared, duplex, target, Vec::new(), None).await
         }
         InboundProto::Vless(uuids) => {
@@ -454,8 +464,14 @@ pub(crate) async fn run_proto_pipeline(
             };
             match omni_proto::proto::vless::inbound::handshake(stream, &cfg).await? {
                 Accepted::Tcp { target, stream } => {
-                    run_tcp_route(shared, omni_domain::stream::boxed(stream), target, Vec::new(), None)
-                        .await
+                    run_tcp_route(
+                        shared,
+                        omni_domain::stream::boxed(stream),
+                        target,
+                        Vec::new(),
+                        None,
+                    )
+                    .await
                 }
                 Accepted::Udp { .. } => Err(std::io::Error::new(
                     std::io::ErrorKind::Unsupported,
@@ -468,7 +484,8 @@ pub(crate) async fn run_proto_pipeline(
                 users: uuids.clone(),
             };
             let acc = omni_proto::proto::vmess::inbound::handshake(stream, &cfg).await?;
-            let duplex = crate::runtime::assembly::outbound_artifacts::vmess_duplex(acc.reader, acc.writer);
+            let duplex =
+                crate::runtime::assembly::outbound_artifacts::vmess_duplex(acc.reader, acc.writer);
             run_tcp_route(shared, duplex, acc.target, Vec::new(), None).await
         }
         InboundProto::Hysteria2 { .. } => Err(std::io::Error::other(
@@ -496,10 +513,7 @@ async fn resolve_udp_outbound(
     shared.router.first_udp_connector()
 }
 
-async fn handle_trojan_udp(
-    shared: PipelineShared,
-    control: BoxProxyStream,
-) -> std::io::Result<()> {
+async fn handle_trojan_udp(shared: PipelineShared, control: BoxProxyStream) -> std::io::Result<()> {
     let connector: Arc<dyn crate::runtime::assembly::outbound_artifacts::OutboundConnector> =
         resolve_udp_outbound(&shared).await?;
     let handle = connector.connect_udp(shared.dialer.clone()).await?;
@@ -557,10 +571,7 @@ async fn handle_trojan_udp(
     Ok(())
 }
 
-async fn handle_vless_udp(
-    shared: PipelineShared,
-    control: BoxProxyStream,
-) -> std::io::Result<()> {
+async fn handle_vless_udp(shared: PipelineShared, control: BoxProxyStream) -> std::io::Result<()> {
     let connector: Arc<dyn crate::runtime::assembly::outbound_artifacts::OutboundConnector> =
         resolve_udp_outbound(&shared).await?;
     let handle = connector.connect_udp(shared.dialer.clone()).await?;

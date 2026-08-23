@@ -30,7 +30,7 @@ impl MuxKind {
 }
 
 fn ioerr(msg: &str) -> io::Error {
-    io::Error::other( format!("mux: {}", msg))
+    io::Error::other(format!("mux: {}", msg))
 }
 
 struct TokioToFut<T>(T);
@@ -61,17 +61,11 @@ impl<T: tokio::io::AsyncWrite + Unpin + Send> futures_util::AsyncWrite for Tokio
         Pin::new(&mut self.0).poll_write(cx, buf)
     }
 
-    fn poll_flush(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.0).poll_flush(cx)
     }
 
-    fn poll_close(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.0).poll_shutdown(cx)
     }
 }
@@ -110,19 +104,13 @@ impl<T: AsyncWrite + Unpin> AsyncWrite for WakeDriverIo<T> {
         r
     }
 
-    fn poll_flush(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         let r = Pin::new(&mut self.inner).poll_flush(cx);
         poke_driver(&self.waker);
         r
     }
 
-    fn poll_shutdown(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<io::Result<()>> {
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         let r = Pin::new(&mut self.inner).poll_shutdown(cx);
         poke_driver(&self.waker);
         r
@@ -131,7 +119,10 @@ impl<T: AsyncWrite + Unpin> AsyncWrite for WakeDriverIo<T> {
 
 enum Backend {
     Smux(smux::Session),
-    Yamux { open_tx: mpsc::Sender<OpenReq>, accept_rx: Arc<tokio::sync::Mutex<mpsc::Receiver<io::Result<BoxProxyStream>>>> },
+    Yamux {
+        open_tx: mpsc::Sender<OpenReq>,
+        accept_rx: Arc<tokio::sync::Mutex<mpsc::Receiver<io::Result<BoxProxyStream>>>>,
+    },
 }
 
 type OpenReq = tokio::sync::oneshot::Sender<io::Result<BoxProxyStream>>;
@@ -147,7 +138,9 @@ impl MuxSession {
                 let inner = smux::Session::client(stream, smux::Config::default())
                     .await
                     .map_err(|e| ioerr(&e.to_string()))?;
-                Ok(MuxSession { backend: Backend::Smux(inner) })
+                Ok(MuxSession {
+                    backend: Backend::Smux(inner),
+                })
             }
             MuxKind::Yamux => {
                 let mut cfg = yamux::Config::default();
@@ -170,7 +163,9 @@ impl MuxSession {
                 let inner = smux::Session::server(stream, smux::Config::default())
                     .await
                     .map_err(|e| ioerr(&e.to_string()))?;
-                Ok(MuxSession { backend: Backend::Smux(inner) })
+                Ok(MuxSession {
+                    backend: Backend::Smux(inner),
+                })
             }
             MuxKind::Yamux => {
                 let mut cfg = yamux::Config::default();
@@ -195,7 +190,11 @@ impl MuxSession {
             }
             Backend::Yamux { open_tx, .. } => {
                 let (tx, rx) = tokio::sync::oneshot::channel();
-                open_tx.clone().send(tx).await.map_err(|_| ioerr("yamux driver closed"))?;
+                open_tx
+                    .clone()
+                    .send(tx)
+                    .await
+                    .map_err(|_| ioerr("yamux driver closed"))?;
                 rx.await.map_err(|_| ioerr("yamux driver dropped result"))?
             }
         }
@@ -221,7 +220,10 @@ impl MuxSession {
 
 fn spawn_yamux_driver(
     mut conn: yamux::Connection<TokioToFut<BoxProxyStream>>,
-) -> (mpsc::Sender<OpenReq>, mpsc::Receiver<io::Result<BoxProxyStream>>) {
+) -> (
+    mpsc::Sender<OpenReq>,
+    mpsc::Receiver<io::Result<BoxProxyStream>>,
+) {
     let (open_tx, mut open_rx) = mpsc::channel::<OpenReq>(64);
     let (accept_tx, accept_rx) = mpsc::channel::<io::Result<BoxProxyStream>>(64);
     let mut pending_open: Option<OpenReq> = None;

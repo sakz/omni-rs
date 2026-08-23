@@ -38,14 +38,15 @@ impl Dialer {
 
     pub async fn bind_udp_for(&self, target: &ProxyTarget) -> io::Result<UdpSocket> {
         let addr = self.resolve(target).await?;
-        let local = if addr.is_ipv4() { "0.0.0.0:0" } else { "[::]:0" };
+        let local = if addr.is_ipv4() {
+            "0.0.0.0:0"
+        } else {
+            "[::]:0"
+        };
         UdpSocket::bind(local).await
     }
 
-    pub async fn resolve(
-        &self,
-        target: &ProxyTarget,
-    ) -> io::Result<std::net::SocketAddr> {
+    pub async fn resolve(&self, target: &ProxyTarget) -> io::Result<std::net::SocketAddr> {
         match target {
             ProxyTarget::Tcp(a) => Ok(*a),
             ProxyTarget::Domain(h, p) => {

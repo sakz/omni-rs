@@ -52,8 +52,8 @@ impl GeoRegistry {
     }
 
     pub fn load_list_file(&self, path: &str, kind: &str, code: &str) -> Result<usize, String> {
-        let text = std::fs::read_to_string(path)
-            .map_err(|e| format!("geo: read {}: {}", path, e))?;
+        let text =
+            std::fs::read_to_string(path).map_err(|e| format!("geo: read {}: {}", path, e))?;
         let mut n = 0usize;
         match kind {
             "geosite" => {
@@ -68,9 +68,7 @@ impl GeoRegistry {
                         .map(|(a, b)| (a.trim(), b.trim()))
                         .unwrap_or(("full", line));
                     match t {
-                        "domain" | "suffix" => {
-                            pats.push(DomainPattern::Suffix(v.to_string()))
-                        }
+                        "domain" | "suffix" => pats.push(DomainPattern::Suffix(v.to_string())),
                         "keyword" => pats.push(DomainPattern::Keyword(v.to_string())),
                         "regex" => {
                             let re = regex::Regex::new(v)
@@ -101,7 +99,13 @@ impl GeoRegistry {
 
 fn parse_v2ray_dat(
     data: &[u8],
-) -> Result<(Vec<(String, Vec<DomainPattern>)>, Vec<(String, Vec<String>)>), String> {
+) -> Result<
+    (
+        Vec<(String, Vec<DomainPattern>)>,
+        Vec<(String, Vec<String>)>,
+    ),
+    String,
+> {
     let mut sites: Vec<(String, Vec<DomainPattern>)> = Vec::new();
     let mut countries: Vec<(String, Vec<String>)> = Vec::new();
 
@@ -124,7 +128,13 @@ fn parse_v2ray_dat(
     Ok((sites, countries))
 }
 
-fn parse_geo_entry(entry: &[u8]) -> Option<(String, bool, (Option<Vec<DomainPattern>>, Option<Vec<String>>))> {
+fn parse_geo_entry(
+    entry: &[u8],
+) -> Option<(
+    String,
+    bool,
+    (Option<Vec<DomainPattern>>, Option<Vec<String>>),
+)> {
     let mut r = PbReader::new(entry);
     let mut code = String::new();
     let mut pats: Vec<DomainPattern> = Vec::new();

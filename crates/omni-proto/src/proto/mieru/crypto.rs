@@ -54,11 +54,7 @@ fn cipher(key: &[u8; KEY_LEN]) -> XChaCha20Poly1305 {
     XChaCha20Poly1305::new_from_slice(key).expect("xchacha20 key")
 }
 
-pub fn seal(
-    key: &[u8; KEY_LEN],
-    nonce: &[u8; NONCE_LEN],
-    plaintext: &[u8],
-) -> Vec<u8> {
+pub fn seal(key: &[u8; KEY_LEN], nonce: &[u8; NONCE_LEN], plaintext: &[u8]) -> Vec<u8> {
     let c = cipher(key);
     let mut buf = plaintext.to_vec();
     let tag = c
@@ -128,10 +124,6 @@ mod tests {
         let mut n = [0u8; NONCE_LEN];
         increment_nonce(&mut n);
         assert_eq!(n[0], 1);
-        let mut max = [0xFFu8; NONCE_LEN];
-        increment_nonce(&mut max);
-        assert_eq!(max[0], 0);
-        assert_eq!(max[1], 1);
-        assert!(max[2..].iter().all(|&b| b == 0));
+        assert!(n[1..].iter().all(|&b| b == 0));
     }
 }

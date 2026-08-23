@@ -1,8 +1,8 @@
 use omni_config::wire::RuntimeConfigWire;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -53,7 +53,10 @@ impl UserStore {
                 .unwrap_or_default(),
             Err(_) => PersistedUsers::default(),
         };
-        Ok(Arc::new(UserStore { path, data: RwLock::new(data) }))
+        Ok(Arc::new(UserStore {
+            path,
+            data: RwLock::new(data),
+        }))
     }
 
     pub async fn snapshot(&self) -> PersistedUsers {
@@ -79,8 +82,7 @@ impl UserStore {
             }
         }
         let snap = self.data.read().await.clone();
-        let bytes =
-            serde_json::to_vec_pretty(&snap).map_err(PersistError::Serde)?;
+        let bytes = serde_json::to_vec_pretty(&snap).map_err(PersistError::Serde)?;
         tokio::fs::write(&self.path, bytes)
             .await
             .map_err(PersistError::Io)

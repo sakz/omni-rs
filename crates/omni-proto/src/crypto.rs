@@ -9,9 +9,9 @@ pub mod md5 {
     }
 
     const S: [u32; 64] = [
-        7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20,
-        5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-        6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+        7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5,
+        9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10,
+        15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
     ];
 
     const K: [u32; 64] = [
@@ -287,10 +287,19 @@ mod tests {
 
     #[test]
     fn md5_vectors() {
-        assert_eq!(hex_encode(&md5::digest(&[b"abc"])), "900150983cd24fb0d6963f7d28e17f72");
-        assert_eq!(hex_encode(&md5::digest(&[b""])), "d41d8cd98f00b204e9800998ecf8427e");
+        assert_eq!(
+            hex_encode(&md5::digest(&[b"abc"])),
+            "900150983cd24fb0d6963f7d28e17f72"
+        );
+        assert_eq!(
+            hex_encode(&md5::digest(&[b""])),
+            "d41d8cd98f00b204e9800998ecf8427e"
+        );
         let long = vec![b'a'; 1000];
-        assert_eq!(hex_encode(&md5::digest(&[&long])), "cabe45dcc9ae5b66ba86600cca6b8ba8");
+        assert_eq!(
+            hex_encode(&md5::digest(&[&long])),
+            "cabe45dcc9ae5b66ba86600cca6b8ba8"
+        );
     }
 
     #[test]

@@ -35,7 +35,9 @@ pub async fn execute_tcp(
             Ok(())
         }
         RouteAction::Proxy(connector) => {
-            let mut remote = connector.connect_tcp(&target, shared.dialer.clone()).await?;
+            let mut remote = connector
+                .connect_tcp(&target, shared.dialer.clone())
+                .await?;
             if !pre_read.is_empty() {
                 remote.write_all(&pre_read).await?;
             }

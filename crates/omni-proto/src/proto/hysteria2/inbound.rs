@@ -17,15 +17,15 @@ pub struct Hysteria2Listener {
 }
 
 fn io_err(e: impl std::fmt::Display) -> io::Error {
-    io::Error::other( format!("hysteria2: {}", e))
+    io::Error::other(format!("hysteria2: {}", e))
 }
 
 impl Hysteria2Listener {
     pub fn bind(cfg: &Hysteria2ServerConfig) -> io::Result<Self> {
         omni_transport::tls::init_crypto_provider();
 
-        let server_cfg = build_rustls_server_config(&cfg.tls_material, &["h3".to_string()])
-            .map_err(io_err)?;
+        let server_cfg =
+            build_rustls_server_config(&cfg.tls_material, &["h3".to_string()]).map_err(io_err)?;
 
         let mut transport = quinn::TransportConfig::default();
         transport.max_idle_timeout(Some(
@@ -33,10 +33,9 @@ impl Hysteria2Listener {
         ));
         transport.datagram_receive_buffer_size(Some(65535));
         transport.datagram_send_buffer_size(65535);
-        let mut server_cfg_quinn =
-            quinn::ServerConfig::with_crypto(Arc::new(
-                quinn::crypto::rustls::QuicServerConfig::try_from(server_cfg).map_err(io_err)?,
-            ));
+        let mut server_cfg_quinn = quinn::ServerConfig::with_crypto(Arc::new(
+            quinn::crypto::rustls::QuicServerConfig::try_from(server_cfg).map_err(io_err)?,
+        ));
         server_cfg_quinn.transport_config(Arc::new(transport));
 
         let endpoint = quinn::Endpoint::server(server_cfg_quinn, cfg.listen).map_err(io_err)?;
@@ -64,7 +63,10 @@ impl Hysteria2Listener {
             tokio::spawn(async move {
                 tracing::info!(target: "internal.pipeline", "hysteria2 quic conn established peer={}", conn.remote_address());
                 let h3_conn = h3_quinn::Connection::new(conn.clone());
-                let mut h3 = match h3::server::builder().build::<h3_quinn::Connection, bytes::Bytes>(h3_conn).await {
+                let mut h3 = match h3::server::builder()
+                    .build::<h3_quinn::Connection, bytes::Bytes>(h3_conn)
+                    .await
+                {
                     Ok(h) => h,
                     Err(e) => {
                         tracing::warn!(target: "internal.pipeline", "hysteria2 h3 init failed: {}", e);
@@ -150,24 +152,32 @@ impl Hysteria2Listener {
                                     total += n;
                                     match decode_tcp_request(&head[..total]) {
                                         Ok((addr, rest)) => {
-                                            if !rest.is_empty() && send.write_all(rest).await.is_err() {
+                                            if !rest.is_empty()
+                                                && send.write_all(rest).await.is_err()
+                                            {
                                                 return;
                                             }
                                             break addr;
                                         }
-                                        Err(e)
-                                            if e.kind()
-                                                == std::io::ErrorKind::UnexpectedEof =>
-                                        {
+                                        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
                                             if total >= head.len() {
-                                                let _ =
-                                                    send.write_all(&encode_tcp_response(false, "addr too long")).await;
+                                                let _ = send
+                                                    .write_all(&encode_tcp_response(
+                                                        false,
+                                                        "addr too long",
+                                                    ))
+                                                    .await;
                                                 return;
                                             }
                                             continue;
                                         }
                                         Err(e) => {
-                                            let _ = send.write_all(&encode_tcp_response(false, e.to_string().as_str())).await;
+                                            let _ = send
+                                                .write_all(&encode_tcp_response(
+                                                    false,
+                                                    e.to_string().as_str(),
+                                                ))
+                                                .await;
                                             return;
                                         }
                                     }
@@ -185,8 +195,12 @@ impl Hysteria2Listener {
                         tracing::info!(target: "internal.pipeline", "hysteria2 tcp stream target={}", addr);
                         let stream = HysteriaStream { send, recv };
                         match on_tcp(omni_domain::stream::boxed(stream), addr.clone()).await {
-                            Ok(()) => tracing::debug!(target: "internal.pipeline", "hysteria2 stream done target={}", addr),
-                            Err(e) => tracing::warn!(target: "internal.pipeline", "hysteria2 stream error target={} error={}", addr, e),
+                            Ok(()) => {
+                                tracing::debug!(target: "internal.pipeline", "hysteria2 stream done target={}", addr)
+                            }
+                            Err(e) => {
+                                tracing::warn!(target: "internal.pipeline", "hysteria2 stream error target={} error={}", addr, e)
+                            }
                         }
                     });
                 }
@@ -218,9 +232,7 @@ impl AsyncWrite for HysteriaStream {
     ) -> std::task::Poll<io::Result<usize>> {
         match Pin::new(&mut self.send).poll_write(cx, buf) {
             std::task::Poll::Ready(Ok(n)) => std::task::Poll::Ready(Ok(n)),
-            std::task::Poll::Ready(Err(e)) => {
-                std::task::Poll::Ready(Err(io::Error::other( e)))
-            }
+            std::task::Poll::Ready(Err(e)) => std::task::Poll::Ready(Err(io::Error::other(e))),
             std::task::Poll::Pending => std::task::Poll::Pending,
         }
     }
@@ -298,11 +310,7 @@ async fn run_udp_dispatcher(conn: quinn::Connection) {
         };
 
         use std::net::ToSocketAddrs;
-        let target: Option<SocketAddr> = msg
-            .addr
-            .to_socket_addrs()
-            .ok()
-            .and_then(|mut i| i.next());
+        let target: Option<SocketAddr> = msg.addr.to_socket_addrs().ok().and_then(|mut i| i.next());
         let target = match target {
             Some(t) => t,
             None => continue,

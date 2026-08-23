@@ -8,9 +8,13 @@ pub fn validate(wire: &RuntimeConfigWire) -> Result<(), String> {
         } else {
             ob.tag.clone()
         };
-        validate_outbound(ob).map_err(|e| format!("config validation failed for outbound {}: {}", label, e))?;
+        validate_outbound(ob)
+            .map_err(|e| format!("config validation failed for outbound {}: {}", label, e))?;
         if ob.tag.is_empty() {
-            return Err("config validation failed for outbound <untagged>: outbound tag cannot be empty".to_string());
+            return Err(
+                "config validation failed for outbound <untagged>: outbound tag cannot be empty"
+                    .to_string(),
+            );
         }
         if tags.contains(&ob.tag.as_str()) {
             return Err(format!(
@@ -61,9 +65,7 @@ fn validate_target(
             proto
         )),
         Some(t) => {
-            if t.server.as_deref().map(str::is_empty).unwrap_or(true)
-                || t.server_port.is_none()
-            {
+            if t.server.as_deref().map(str::is_empty).unwrap_or(true) || t.server_port.is_none() {
                 return Err(format!(
                     "protocol {} requires target.server and target.server_port",
                     proto
@@ -110,7 +112,9 @@ fn validate_outbound(ob: &omni_config::wire::OutboundSpecWire) -> Result<(), Str
 }
 
 fn validate_node(node: &omni_config::wire::NodeConfigWire) -> Result<(), String> {
-    if node.r#type.as_str() == "" { return Err("protocol cannot be empty".to_string()) }
+    if node.r#type.as_str() == "" {
+        return Err("protocol cannot be empty".to_string());
+    }
     if !node.mux_enabled {
         if let Some(mux) = &node.mux {
             if mux.kind.is_some() {
@@ -165,13 +169,19 @@ fn validate_tls(tls: &omni_config::wire::TlsInboundSpecWire) -> Result<(), Strin
             }
         }
         other => {
-            return Err(format!("cert: unsupported cert_mode: {}", other.unwrap_or("")));
+            return Err(format!(
+                "cert: unsupported cert_mode: {}",
+                other.unwrap_or("")
+            ));
         }
     }
     if let Some(reality) = &tls.reality {
         for sid in &reality.short_ids {
             if !hex_decode_check(sid) {
-                return Err(format!("reality.short_ids entry '{}' is not valid hex", sid));
+                return Err(format!(
+                    "reality.short_ids entry '{}' is not valid hex",
+                    sid
+                ));
             }
         }
     }

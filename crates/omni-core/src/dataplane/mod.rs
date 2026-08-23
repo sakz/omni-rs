@@ -1,4 +1,3 @@
-
 use omni_config::model::Backend;
 
 #[tracing::instrument]

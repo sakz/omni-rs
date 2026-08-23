@@ -16,10 +16,15 @@ pub const ATYP_DOMAIN: u8 = 0x02;
 pub const ATYP_V6: u8 = 0x03;
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::other( msg)
+    std::io::Error::other(msg)
 }
 
-pub fn encode_request(uuid_bytes: &[u8; 16], cmd: u8, target: &ProxyTarget, addons: &[u8]) -> Vec<u8> {
+pub fn encode_request(
+    uuid_bytes: &[u8; 16],
+    cmd: u8,
+    target: &ProxyTarget,
+    addons: &[u8],
+) -> Vec<u8> {
     let mut out = Vec::with_capacity(64 + addons.len());
     out.push(0);
     out.extend_from_slice(uuid_bytes);
@@ -47,9 +52,7 @@ pub fn encode_request(uuid_bytes: &[u8; 16], cmd: u8, target: &ProxyTarget, addo
     out
 }
 
-pub async fn read_request_head<S>(
-    stream: &mut S,
-) -> std::io::Result<([u8; 16], u8, ProxyTarget)>
+pub async fn read_request_head<S>(stream: &mut S) -> std::io::Result<([u8; 16], u8, ProxyTarget)>
 where
     S: tokio::io::AsyncRead + Unpin,
 {
@@ -142,7 +145,9 @@ async fn read_full<S: tokio::io::AsyncRead + Unpin>(
     tracing::debug!(target: "internal.pipeline", "vless read_full want={}", buf.len());
     let r = s.read_exact(buf).await.map(|_| ());
     match &r {
-        Ok(()) => tracing::debug!(target: "internal.pipeline", "vless read_full got={} hex={}", buf.len(), crate::crypto::hex_encode(buf)),
+        Ok(()) => {
+            tracing::debug!(target: "internal.pipeline", "vless read_full got={} hex={}", buf.len(), crate::crypto::hex_encode(buf))
+        }
         Err(e) => tracing::debug!(target: "internal.pipeline", "vless read_full err={}", e),
     }
     r

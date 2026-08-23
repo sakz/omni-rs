@@ -1,12 +1,13 @@
 use crate::pipeline::executor::RouteAction;
-use std::pin::Pin;
 use omni_domain::matching::compiler::CompiledRule;
 use omni_domain::stream::{BoxProxyStream, ProxyTarget, UdpHandle};
 use omni_transport::dial::Dialer;
+use std::pin::Pin;
 use std::sync::Arc;
 
-pub type DialFut<'a> =
-    std::pin::Pin<Box<dyn std::future::Future<Output = std::io::Result<BoxProxyStream>> + Send + 'a>>;
+pub type DialFut<'a> = std::pin::Pin<
+    Box<dyn std::future::Future<Output = std::io::Result<BoxProxyStream>> + Send + 'a>,
+>;
 
 pub trait OutboundConnector: Send + Sync {
     fn tag(&self) -> &str;
@@ -55,7 +56,8 @@ impl OutboundConnector for DirectOutbound {
         Box::pin(async move {
             use tokio::net::UdpSocket;
             let sock = Arc::new(UdpSocket::bind("0.0.0.0:0").await?);
-            let (tx_out, mut rx_out) = tokio::sync::mpsc::channel::<omni_domain::stream::UdpPacket>(256);
+            let (tx_out, mut rx_out) =
+                tokio::sync::mpsc::channel::<omni_domain::stream::UdpPacket>(256);
             let (tx_in, rx_in) = tokio::sync::mpsc::channel(256);
             let sock_reader = Arc::clone(&sock);
             let sock_writer = Arc::clone(&sock);
@@ -109,12 +111,13 @@ impl OutboundConnector for RejectOutbound {
 
     fn connect_tcp(&self, _target: &ProxyTarget, __dialer: Arc<Dialer>) -> DialFut<'_> {
         Box::pin(async {
-            Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, "rejected"))
+            Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "rejected",
+            ))
         })
     }
 }
-
-
 
 #[derive(Clone)]
 pub struct TlsClientSpec {
@@ -134,7 +137,6 @@ pub struct TrojanConnector {
     pub mux_pool: Option<Arc<omni_mux::pool::MuxPool>>,
 }
 
-
 impl OutboundConnector for TrojanConnector {
     fn tag(&self) -> &str {
         &self.tag_name
@@ -147,12 +149,18 @@ impl OutboundConnector for TrojanConnector {
     fn connect_udp(
         &self,
         dialer: Arc<Dialer>,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = std::io::Result<omni_domain::stream::UdpHandle>> + Send + '_>>
-    {
+    ) -> std::pin::Pin<
+        Box<
+            dyn std::future::Future<Output = std::io::Result<omni_domain::stream::UdpHandle>>
+                + Send
+                + '_,
+        >,
+    > {
         let cfg = self.clone();
         Box::pin(async move {
             let underlay =
-                dial_with_transport(dialer, &cfg.server, cfg.port, cfg.tls.as_ref(), None, None).await?;
+                dial_with_transport(dialer, &cfg.server, cfg.port, cfg.tls.as_ref(), None, None)
+                    .await?;
             let relay = omni_proto::proto::trojan::outbound::UdpRelayClient::start(
                 underlay,
                 Arc::new(omni_proto::proto::trojan::outbound::TrojanOutboundConfig {
@@ -185,7 +193,8 @@ impl OutboundConnector for TrojanConnector {
                 password: cfg.password.clone(),
             };
             let stream =
-                omni_proto::proto::trojan::outbound::connect_tcp_raw(underlay, &tcfg, &target).await?;
+                omni_proto::proto::trojan::outbound::connect_tcp_raw(underlay, &tcfg, &target)
+                    .await?;
             Ok(stream)
         })
     }
@@ -240,13 +249,25 @@ impl OutboundConnector for VlessConnector {
     fn connect_udp(
         &self,
         dialer: Arc<Dialer>,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = std::io::Result<omni_domain::stream::UdpHandle>> + Send + '_>>
-    {
+    ) -> std::pin::Pin<
+        Box<
+            dyn std::future::Future<Output = std::io::Result<omni_domain::stream::UdpHandle>>
+                + Send
+                + '_,
+        >,
+    > {
         let cfg = self.config.clone();
         let tls = self.tls.clone();
         Box::pin(async move {
-            let underlay =
-                dial_with_transport(dialer, cfg.server.as_str(), cfg.server_port, tls.as_ref(), None, None).await?;
+            let underlay = dial_with_transport(
+                dialer,
+                cfg.server.as_str(),
+                cfg.server_port,
+                tls.as_ref(),
+                None,
+                None,
+            )
+            .await?;
             omni_proto::proto::vless::outbound::connect_udp(underlay, &cfg).await
         })
     }
@@ -256,8 +277,7 @@ impl OutboundConnector for VlessConnector {
         let tls = self.tls.clone();
         let target = target.clone();
         Box::pin(async move {
-            let underlay =
-                dial_with_transport(
+            let underlay = dial_with_transport(
                 dialer,
                 cfg.server.as_str(),
                 cfg.server_port,
@@ -266,7 +286,8 @@ impl OutboundConnector for VlessConnector {
                 self.mux_pool.as_ref(),
             )
             .await?;
-            let stream = omni_proto::proto::vless::outbound::connect_tcp(underlay, &cfg, &target).await?;
+            let stream =
+                omni_proto::proto::vless::outbound::connect_tcp(underlay, &cfg, &target).await?;
             Ok(omni_domain::stream::boxed(stream))
         })
     }
@@ -289,8 +310,15 @@ impl OutboundConnector for VmessConnector {
         let tls = self.tls.clone();
         let target = target.clone();
         Box::pin(async move {
-            let underlay = dial_underlay(dialer, cfg.base.server.as_str(), cfg.base.server_port, tls.as_ref()).await?;
-            let (r, w) = omni_proto::proto::vmess::outbound::connect_tcp(underlay, &cfg, &target).await?;
+            let underlay = dial_underlay(
+                dialer,
+                cfg.base.server.as_str(),
+                cfg.base.server_port,
+                tls.as_ref(),
+            )
+            .await?;
+            let (r, w) =
+                omni_proto::proto::vmess::outbound::connect_tcp(underlay, &cfg, &target).await?;
             Ok(vmess_duplex(r, w))
         })
     }
@@ -382,8 +410,15 @@ impl AnytlsConnector {
                 return Ok(s.clone());
             }
         }
-        let underlay =
-            dial_with_transport(dialer.clone(), &self.server, self.port, self.tls.as_ref(), None, None).await?;
+        let underlay = dial_with_transport(
+            dialer.clone(),
+            &self.server,
+            self.port,
+            self.tls.as_ref(),
+            None,
+            None,
+        )
+        .await?;
         let session = omni_proto::proto::anytls::client::connect(underlay, &self.password).await?;
         *self.session_pool.lock().await = Some(session.clone());
         Ok(session)
@@ -431,7 +466,8 @@ pub struct Hysteria2Connector {
     pub password: String,
     pub insecure: bool,
     pub sni: Option<String>,
-    pub conn_pool: Arc<tokio::sync::Mutex<Option<Arc<omni_proto::proto::hysteria2::outbound::Hysteria2Conn>>>>,
+    pub conn_pool:
+        Arc<tokio::sync::Mutex<Option<Arc<omni_proto::proto::hysteria2::outbound::Hysteria2Conn>>>>,
 }
 
 impl Hysteria2Connector {
@@ -455,8 +491,9 @@ impl Hysteria2Connector {
             sni: self.sni.clone(),
         };
         let addr = resolve_server_addr(dialer, &self.server, self.port).await?;
-        let conn =
-            Arc::new(omni_proto::proto::hysteria2::outbound::Hysteria2Conn::connect(&cfg, addr).await?);
+        let conn = Arc::new(
+            omni_proto::proto::hysteria2::outbound::Hysteria2Conn::connect(&cfg, addr).await?,
+        );
         *self.conn_pool.lock().await = Some(conn.clone());
         Ok(conn)
     }
@@ -577,16 +614,9 @@ where
 {
     use base64::Engine;
     let authority = format!("{}", target);
-    let mut req = format!(
-        "CONNECT {a} HTTP/1.1\r\nHost: {a}\r\n",
-        a = authority
-    );
+    let mut req = format!("CONNECT {a} HTTP/1.1\r\nHost: {a}\r\n", a = authority);
     if let Some(u) = user {
-        let creds = format!(
-            "{}:{}",
-            u,
-            pass.unwrap_or("")
-        );
+        let creds = format!("{}:{}", u, pass.unwrap_or(""));
         req.push_str(&format!(
             "Proxy-Authorization: Basic {}\r\n",
             base64::engine::general_purpose::STANDARD.encode(creds)
@@ -668,8 +698,10 @@ where
         let _ = out_tx.send(Ok(Vec::new()));
     });
 
-    let (in_tx, mut in_rx): (mpsc::UnboundedSender<Vec<u8>>, mpsc::UnboundedReceiver<Vec<u8>>) =
-        mpsc::unbounded_channel();
+    let (in_tx, mut in_rx): (
+        mpsc::UnboundedSender<Vec<u8>>,
+        mpsc::UnboundedReceiver<Vec<u8>>,
+    ) = mpsc::unbounded_channel();
     tokio::spawn(async move {
         let mut w = w;
         while let Some(v) = in_rx.recv().await {
@@ -721,7 +753,10 @@ where
         let _ = out_tx.send(Ok(Vec::new()));
     });
 
-    let (in_tx, mut in_rx): (mpsc::UnboundedSender<Vec<u8>>, mpsc::UnboundedReceiver<Vec<u8>>) = mpsc::unbounded_channel();
+    let (in_tx, mut in_rx): (
+        mpsc::UnboundedSender<Vec<u8>>,
+        mpsc::UnboundedReceiver<Vec<u8>>,
+    ) = mpsc::unbounded_channel();
     tokio::spawn(async move {
         let mut w = w;
         while let Some(v) = in_rx.recv().await {
@@ -838,10 +873,7 @@ impl TransportSpec {
         }
         Some(TransportSpec {
             kind,
-            path: obj
-                .get("path")
-                .and_then(|p| p.as_str())
-                .map(String::from),
+            path: obj.get("path").and_then(|p| p.as_str()).map(String::from),
             host: obj
                 .get("host")
                 .or_else(|| obj.get("host_header"))
@@ -875,7 +907,9 @@ pub async fn dial_with_transport(
             let connect = Box::pin(async move {
                 dial_underlay(d2, &server_owned, port, tls2.as_ref()).await
             })
-                as Pin<Box<dyn std::future::Future<Output = std::io::Result<BoxProxyStream>> + Send>>;
+                as Pin<
+                    Box<dyn std::future::Future<Output = std::io::Result<BoxProxyStream>> + Send>,
+                >;
             let (stream, _lease) = pool.dial(connect).await?;
             stream
         }
@@ -892,11 +926,16 @@ pub async fn dial_with_transport(
                 };
                 let target = ProxyTarget::Domain(server.to_string(), port);
                 let ws = omni_transport::ws::connect_outbound(underlay, &spec, &target).await?;
-                Ok(omni_domain::stream::boxed(omni_transport::ws::WsProxyStream::new(ws)))
+                Ok(omni_domain::stream::boxed(
+                    omni_transport::ws::WsProxyStream::new(ws),
+                ))
             }
             "grpc" => {
                 let spec = omni_transport::grpc::GrpcOutboundSpec {
-                    service_name: t.service_name.clone().unwrap_or_else(|| "GunService".into()),
+                    service_name: t
+                        .service_name
+                        .clone()
+                        .unwrap_or_else(|| "GunService".into()),
                     host_header: t.host.clone(),
                 };
                 let target = ProxyTarget::Domain(server.to_string(), port);
@@ -908,7 +947,12 @@ pub async fn dial_with_transport(
                     host: t.host.clone(),
                     mode: None,
                 };
-                omni_transport::xhttp::connect_outbound(underlay, &spec, &ProxyTarget::Domain(server.to_string(), port)).await
+                omni_transport::xhttp::connect_outbound(
+                    underlay,
+                    &spec,
+                    &ProxyTarget::Domain(server.to_string(), port),
+                )
+                .await
             }
             "h2" => {
                 let mut conn = omni_transport::h2::client_handshake(underlay).await?;
@@ -951,15 +995,19 @@ pub async fn dial_underlay(
             let cfg = omni_transport::tls::build_client_config(&settings)
                 .map_err(std::io::Error::other)?;
             let name = omni_transport::tls::server_name_for(server, spec.sni_override.as_deref());
-            let sni = rustls_pki_types::ServerName::try_from(name.clone())
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, format!("tls: bad server name '{}': {}", name, e)))?;
+            let sni = rustls_pki_types::ServerName::try_from(name.clone()).map_err(|e| {
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    format!("tls: bad server name '{}': {}", name, e),
+                )
+            })?;
             let conn = tokio_rustls::TlsConnector::from(cfg);
-            let stream = tokio::time::timeout(
-                std::time::Duration::from_secs(10),
-                conn.connect(sni, raw),
-            )
-            .await
-            .map_err(|_| std::io::Error::new(std::io::ErrorKind::TimedOut, "tls: handshake timeout"))??;
+            let stream =
+                tokio::time::timeout(std::time::Duration::from_secs(10), conn.connect(sni, raw))
+                    .await
+                    .map_err(|_| {
+                        std::io::Error::new(std::io::ErrorKind::TimedOut, "tls: handshake timeout")
+                    })??;
             Ok(omni_domain::stream::boxed(stream))
         }
     }
@@ -1018,7 +1066,13 @@ impl Router {
             if !e.rule.has_criteria {
                 continue;
             }
-            if e.rule.matches(host.as_deref(), ip, port, Some(inbound_tag), self.geo.as_ref()) {
+            if e.rule.matches(
+                host.as_deref(),
+                ip,
+                port,
+                Some(inbound_tag),
+                self.geo.as_ref(),
+            ) {
                 return self.entry_action(e);
             }
         }

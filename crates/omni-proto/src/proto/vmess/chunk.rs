@@ -1,7 +1,10 @@
 use crate::proto::vmess::shake::ShakeSizeParser;
 use std::io;
 
-async fn read_exact_vec<R: tokio::io::AsyncRead + Unpin>(r: &mut R, n: usize) -> io::Result<Vec<u8>> {
+async fn read_exact_vec<R: tokio::io::AsyncRead + Unpin>(
+    r: &mut R,
+    n: usize,
+) -> io::Result<Vec<u8>> {
     use tokio::io::AsyncReadExt;
     let mut v = vec![0u8; n];
     r.read_exact(&mut v).await?;
@@ -226,7 +229,10 @@ where
             };
             let total = piece.len() + overhead + padding_len;
             if total > u16::MAX as usize {
-                return Err(io::Error::new(io::ErrorKind::InvalidData, "vmess: chunk too large"));
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "vmess: chunk too large",
+                ));
             }
 
             let size_field = total as u16;
@@ -266,7 +272,11 @@ where
                 _ => 16,
             };
             let is_none = matches!(self.security, ChunkSecurity::None);
-            let padding_len = if self.padding { self.size_parser.next_padding_len() as usize } else { 0 };
+            let padding_len = if self.padding {
+                self.size_parser.next_padding_len() as usize
+            } else {
+                0
+            };
             let total = (overhead + padding_len) as u16;
             let size_bytes = if self.masking {
                 self.size_parser.encode(total).to_vec()
@@ -306,11 +316,11 @@ where
 
 fn aead_seal_gcm(key: &[u8; 16], nonce: &[u8; 12], plaintext: &mut Vec<u8>) -> io::Result<()> {
     use aes_gcm::aead::{AeadInPlace, KeyInit};
-    let cipher = aes_gcm::Aes128Gcm::new_from_slice(key)
-        .map_err(|_| io::Error::other( "vmess: gcm init"))?;
+    let cipher =
+        aes_gcm::Aes128Gcm::new_from_slice(key).map_err(|_| io::Error::other("vmess: gcm init"))?;
     let tag = cipher
         .encrypt_in_place_detached(aes_gcm::Nonce::from_slice(nonce), b"", plaintext)
-        .map_err(|_| io::Error::other( "vmess: encrypt failed"))?;
+        .map_err(|_| io::Error::other("vmess: encrypt failed"))?;
     plaintext.extend_from_slice(tag.as_slice());
     Ok(())
 }
@@ -318,10 +328,10 @@ fn aead_seal_gcm(key: &[u8; 16], nonce: &[u8; 12], plaintext: &mut Vec<u8>) -> i
 fn aead_seal_chacha(key: &[u8; 32], nonce: &[u8; 12], plaintext: &mut Vec<u8>) -> io::Result<()> {
     use chacha20poly1305::aead::{AeadInPlace, KeyInit};
     let cipher = chacha20poly1305::ChaCha20Poly1305::new_from_slice(key)
-        .map_err(|_| io::Error::other( "vmess: chacha init"))?;
+        .map_err(|_| io::Error::other("vmess: chacha init"))?;
     let tag = cipher
         .encrypt_in_place_detached(chacha20poly1305::Nonce::from_slice(nonce), b"", plaintext)
-        .map_err(|_| io::Error::other( "vmess: encrypt failed"))?;
+        .map_err(|_| io::Error::other("vmess: encrypt failed"))?;
     plaintext.extend_from_slice(tag.as_slice());
     Ok(())
 }

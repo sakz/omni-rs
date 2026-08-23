@@ -14,12 +14,11 @@ pub struct ServerConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::other( msg.to_string())
+    io::Error::other(msg.to_string())
 }
 
-pub type RouteCallback = Arc<
-    dyn Fn(PrefixedStream, omni_domain::stream::ProxyTarget) + Send + Sync,
->;
+pub type RouteCallback =
+    Arc<dyn Fn(PrefixedStream, omni_domain::stream::ProxyTarget) + Send + Sync>;
 
 async fn read_auth<S>(stream: &mut S, password: &str) -> io::Result<()>
 where
@@ -65,7 +64,7 @@ where
     let on_stream = move |mut stream: AnytlsStream| {
         let route = route.clone();
         tokio::spawn(async move {
-                let mut buf: Vec<u8> = Vec::with_capacity(280);
+            let mut buf: Vec<u8> = Vec::with_capacity(280);
             let mut tmp = [0u8; 512];
             loop {
                 if let Ok((addr, used)) = omni_domain::socks5::Socks5Addr::decode(&buf) {

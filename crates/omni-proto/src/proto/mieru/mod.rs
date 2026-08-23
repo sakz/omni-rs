@@ -15,7 +15,6 @@ pub const PROTO_OPEN_SESSION_RESP: u8 = 3;
 pub const PROTO_CLOSE_SESSION_REQ: u8 = 4;
 pub const PROTO_CLOSE_SESSION_RESP: u8 = 5;
 
-
 /// Build a 32-byte metadata block (big-endian).
 pub fn build_metadata(
     proto_type: u8,

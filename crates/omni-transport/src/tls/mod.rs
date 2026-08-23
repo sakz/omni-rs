@@ -34,7 +34,10 @@ pub fn resolve_tls_pems(
                 .map_err(|e| format!("cert: failed to read {}: {}", cert_file, e))?;
             let key = std::fs::read(key_file)
                 .map_err(|e| format!("cert: failed to read {}: {}", key_file, e))?;
-            Ok(ServerCertMaterial { cert_pem: cert, key_pem: key })
+            Ok(ServerCertMaterial {
+                cert_pem: cert,
+                key_pem: key,
+            })
         }
         Some("content") => {
             let cert = spec.cert_content.unwrap_or_default();
@@ -76,8 +79,8 @@ pub fn generate_self_signed(domain: &str) -> Result<ServerCertMaterial, String> 
     params
         .distinguished_name
         .push(rcgen::DnType::CommonName, domain.to_string());
-    let key_pair = rcgen::KeyPair::generate()
-        .map_err(|e| format!("key generation failed: {}", e))?;
+    let key_pair =
+        rcgen::KeyPair::generate().map_err(|e| format!("key generation failed: {}", e))?;
     let cert = params
         .self_signed(&key_pair)
         .map_err(|e| format!("signing failed: {}", e))?;
@@ -92,11 +95,10 @@ pub fn build_rustls_server_config(
     alpn: &[String],
 ) -> Result<Arc<rustls::ServerConfig>, String> {
     init_crypto_provider();
-    let certs: Vec<rustls_pki_types::CertificateDer<'static>> = rustls_pemfile::certs(
-        &mut material.cert_pem.as_slice(),
-    )
-    .collect::<Result<Vec<_>, _>>()
-    .map_err(|e| format!("tls: failed to parse certificate PEM: {}", e))?;
+    let certs: Vec<rustls_pki_types::CertificateDer<'static>> =
+        rustls_pemfile::certs(&mut material.cert_pem.as_slice())
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| format!("tls: failed to parse certificate PEM: {}", e))?;
     if certs.is_empty() {
         return Err("tls: no certificates found in PEM".to_string());
     }
@@ -122,14 +124,15 @@ pub fn build_server_config(
     Ok(TlsAcceptor::from(cfg))
 }
 
-
 pub struct ClientTlsSettings {
     pub skip_verify: bool,
     pub alpn: Vec<String>,
     pub server_name_override: Option<String>,
 }
 
-pub fn build_client_config(settings: &ClientTlsSettings) -> Result<Arc<rustls::ClientConfig>, String> {
+pub fn build_client_config(
+    settings: &ClientTlsSettings,
+) -> Result<Arc<rustls::ClientConfig>, String> {
     init_crypto_provider();
     let builder = rustls::ClientConfig::builder();
     let cfg = if settings.skip_verify {

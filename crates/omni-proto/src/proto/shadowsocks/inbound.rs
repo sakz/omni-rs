@@ -1,5 +1,5 @@
 use super::stream::{AeadStreamReader, AeadStreamWriter};
-use super::{derive_subkey, evp_bytes_to_key, SsAead, Method};
+use super::{derive_subkey, evp_bytes_to_key, Method, SsAead};
 use omni_domain::stream::ProxyStream;
 use rand::RngCore;
 

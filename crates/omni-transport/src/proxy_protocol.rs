@@ -3,14 +3,8 @@ use std::net::{IpAddr, SocketAddr};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProxyProtocolHeader {
-    V1 {
-        src: SocketAddr,
-        dst: SocketAddr,
-    },
-    V2 {
-        src: SocketAddr,
-        dst: SocketAddr,
-    },
+    V1 { src: SocketAddr, dst: SocketAddr },
+    V2 { src: SocketAddr, dst: SocketAddr },
 }
 
 fn ioerr(msg: &'static str) -> std::io::Error {
@@ -34,8 +28,7 @@ where
         if buf.len() > 1024 {
             return Err(ioerr("proxy_protocol: header too large"));
         }
-        match tokio::time::timeout(std::time::Duration::from_secs(3), stream.read(&mut tmp)).await
-        {
+        match tokio::time::timeout(std::time::Duration::from_secs(3), stream.read(&mut tmp)).await {
             Ok(Ok(0)) | Ok(Err(_)) | Err(_) => return Err(ioerr("proxy_protocol: missing header")),
             Ok(Ok(n)) => buf.extend_from_slice(&tmp[..n]),
         }
@@ -59,10 +52,26 @@ pub fn parse(buf: &[u8]) -> std::io::Result<(ProxyProtocolHeader, usize)> {
             s.parse::<IpAddr>()
                 .map_err(|_| ioerr("proxy_protocol: bad address in v1 header"))
         };
-        let src = SocketAddr::new(parse_ip(parts[2])?, parts[4].parse().map_err(|_| ioerr("proxy_protocol: bad port"))?);
-        let dst = SocketAddr::new(parse_ip(parts[3])?, parts[5].parse().map_err(|_| ioerr("proxy_protocol: bad port"))?);
+        let src = SocketAddr::new(
+            parse_ip(parts[2])?,
+            parts[4]
+                .parse()
+                .map_err(|_| ioerr("proxy_protocol: bad port"))?,
+        );
+        let dst = SocketAddr::new(
+            parse_ip(parts[3])?,
+            parts[5]
+                .parse()
+                .map_err(|_| ioerr("proxy_protocol: bad port"))?,
+        );
         Ok((ProxyProtocolHeader::V1 { src, dst }, end))
-    } else if buf.len() >= 16 && buf[0] == 0x0D && buf[1] == 0x0A && buf[2] == 0x0D && buf[3] == 0x0A && buf[4] == 0x00 {
+    } else if buf.len() >= 16
+        && buf[0] == 0x0D
+        && buf[1] == 0x0A
+        && buf[2] == 0x0D
+        && buf[3] == 0x0A
+        && buf[4] == 0x00
+    {
         let ver_cmd = buf[12];
         let fam = buf[13];
         if ver_cmd >> 4 != 2 {
@@ -109,7 +118,9 @@ pub fn parse(buf: &[u8]) -> std::io::Result<(ProxyProtocolHeader, usize)> {
 
 pub fn encode_v2(src: SocketAddr, dst: SocketAddr) -> Vec<u8> {
     let mut out = BytesMut::new();
-    out.extend_from_slice(&[0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A]);
+    out.extend_from_slice(&[
+        0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A,
+    ]);
     out.extend_from_slice(&[0x21]);
     let (fam, mut abuf) = match (src.ip(), dst.ip()) {
         (IpAddr::V4(s), IpAddr::V4(d)) => {

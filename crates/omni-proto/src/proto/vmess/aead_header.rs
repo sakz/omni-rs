@@ -9,8 +9,10 @@ pub const KDF_SALT_CONST_AEAD_RESP_HEADER_PAYLOAD_IV: &str = "AEAD Resp Header I
 pub const KDF_SALT_CONST_VMESS_AEAD_KDF: &str = "VMess AEAD KDF";
 pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_AEAD_KEY: &str = "VMess Header AEAD Key";
 pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_AEAD_IV: &str = "VMess Header AEAD Nonce";
-pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_LENGTH_AEAD_KEY: &str = "VMess Header AEAD Key_Length";
-pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_LENGTH_AEAD_IV: &str = "VMess Header AEAD Nonce_Length";
+pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_LENGTH_AEAD_KEY: &str =
+    "VMess Header AEAD Key_Length";
+pub const KDF_SALT_CONST_VMESS_HEADER_PAYLOAD_LENGTH_AEAD_IV: &str =
+    "VMess Header AEAD Nonce_Length";
 
 fn hmac_sha256(key: &[u8], msg: &[u8]) -> [u8; 32] {
     use hmac::{Hmac, Mac};
@@ -132,8 +134,12 @@ pub fn seal_vmess_aead_header(cmd_key: &[u8; 16], data: &[u8]) -> Vec<u8> {
     let mut hdr_nonce = [0u8; 12];
     hdr_nonce.copy_from_slice(&hdr_nonce_full[..12]);
 
-    let enc_len =
-        gcm_seal(&len_key, &len_nonce, &(data.len() as u16).to_be_bytes(), &auth_id);
+    let enc_len = gcm_seal(
+        &len_key,
+        &len_nonce,
+        &(data.len() as u16).to_be_bytes(),
+        &auth_id,
+    );
     let enc_hdr = gcm_seal(&hdr_key, &hdr_nonce, data, &auth_id);
 
     let mut out = Vec::with_capacity(16 + 18 + 8 + enc_hdr.len());
@@ -196,10 +202,17 @@ pub fn open_vmess_aead_header(
 
     let mut enc_len = [0u8; 18];
     stream.read_exact(&mut enc_len)?;
-    let len_plain = gcm_open(&len_key, &len_nonce, &enc_len, &auth_id)
-        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidData, "vmess: failed to decrypt header length"))?;
+    let len_plain = gcm_open(&len_key, &len_nonce, &enc_len, &auth_id).ok_or_else(|| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "vmess: failed to decrypt header length",
+        )
+    })?;
     if len_plain.len() != 2 {
-        return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "vmess: bad length block"));
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "vmess: bad length block",
+        ));
     }
     let hdr_len = u16::from_be_bytes([len_plain[0], len_plain[1]]) as usize;
 
@@ -225,6 +238,9 @@ pub fn open_vmess_aead_header(
     let mut enc_hdr = vec![0u8; hdr_len + 16];
     stream.read_exact(&mut enc_hdr)?;
     gcm_open(&hdr_key, &hdr_nonce, &enc_hdr, &auth_id).ok_or_else(|| {
-        std::io::Error::new(std::io::ErrorKind::InvalidData, "vmess: failed to decrypt header payload")
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "vmess: failed to decrypt header payload",
+        )
     })
 }

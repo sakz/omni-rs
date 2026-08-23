@@ -28,7 +28,10 @@ impl Counters {
 
     pub fn snapshot(&self) -> HashMap<&'static str, u64> {
         let mut m = HashMap::new();
-        m.insert("connections", self.connections_total.load(Ordering::Relaxed));
+        m.insert(
+            "connections",
+            self.connections_total.load(Ordering::Relaxed),
+        );
         m.insert("bytes_up", self.bytes_up.load(Ordering::Relaxed));
         m.insert("bytes_down", self.bytes_down.load(Ordering::Relaxed));
         m

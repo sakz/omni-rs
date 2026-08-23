@@ -1,5 +1,5 @@
-use clap::Subcommand;
 use clap::Parser;
+use clap::Subcommand;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -9,12 +9,14 @@ use clap::Parser;
     disable_version_flag = true
 )]
 pub struct Cli {
-    #[arg(short, long,
-        help = "Config file path (.json or .toml). Used when no subcommand is given")]
+    #[arg(
+        short,
+        long,
+        help = "Config file path (.json or .toml). Used when no subcommand is given"
+    )]
     pub config: Option<String>,
 
-    #[arg(long,
-        help = "Validate config and capability matrix, then exit")]
+    #[arg(long, help = "Validate config and capability matrix, then exit")]
     pub check_config: bool,
 
     #[command(subcommand)]
@@ -24,9 +26,13 @@ pub struct Cli {
 impl Cli {
     pub fn effective(&self) -> (Option<String>, bool) {
         match &self.command {
-            Some(Command::Server { config, check_config }) => {
-                (config.clone().or(self.config.clone()), *check_config || self.check_config)
-            }
+            Some(Command::Server {
+                config,
+                check_config,
+            }) => (
+                config.clone().or(self.config.clone()),
+                *check_config || self.check_config,
+            ),
             _ => (self.config.clone(), self.check_config),
         }
     }

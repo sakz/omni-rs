@@ -32,6 +32,14 @@ const ROUND_CONSTS: [u64; 24] = [
     0x8000000080008008,
 ];
 
+const RHO_OFFSETS: [[u32; 5]; 5] = [
+    [0, 36, 3, 41, 18],
+    [1, 44, 10, 45, 2],
+    [62, 6, 43, 15, 61],
+    [28, 55, 25, 21, 56],
+    [27, 20, 39, 8, 14],
+];
+
 fn keccak_f1600(state: &mut [u64; 25]) {
     for &rc in ROUND_CONSTS.iter() {
         let mut c = [0u64; 5];
@@ -48,16 +56,19 @@ fn keccak_f1600(state: &mut [u64; 25]) {
             }
         }
 
+        // Rho and Pi steps combined (using standard rotation offset table)
         let mut b = [0u64; 25];
         for x in 0..5 {
             for y in 0..5 {
-                b[y + 5 * ((2 * x + 3 * y) % 5)] =
-                    state[x + 5 * y].rotate_left((((x + 1) * (y + 2)) % 64) as u32);
+                let idx = x + 5 * y;
+                let new_idx = y + 5 * ((2 * x + 3 * y) % 5);
+                b[new_idx] = state[idx].rotate_left(RHO_OFFSETS[x][y]);
             }
         }
 
-        for x in 0..5 {
-            for y in 0..5 {
+        // Chi step
+        for y in 0..5 {
+            for x in 0..5 {
                 state[x + 5 * y] =
                     b[x + 5 * y] ^ ((!b[(x + 1) % 5 + 5 * y]) & b[(x + 2) % 5 + 5 * y]);
             }
@@ -170,7 +181,10 @@ mod tests {
         let mut out = [0u8; 32];
         s.squeeze(&mut out);
         let hex: String = out.iter().map(|b| format!("{:02x}", b)).collect();
-        assert_eq!(hex, "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26");
+        assert_eq!(
+            hex,
+            "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26"
+        );
     }
 
     #[test]

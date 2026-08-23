@@ -1,7 +1,9 @@
 use crate::cli::EffectiveArgs;
 use omni_config::wire::RuntimeConfigWire;
 
-pub async fn assemble(args: &EffectiveArgs) -> Result<omni_core::runtime::core::CoreRuntime, String> {
+pub async fn assemble(
+    args: &EffectiveArgs,
+) -> Result<omni_core::runtime::core::CoreRuntime, String> {
     let wire: RuntimeConfigWire = match &args.config {
         Some(path) => omni_config::read_config(path).map_err(|e| e.to_string())?,
         None => RuntimeConfigWire::default(),

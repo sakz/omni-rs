@@ -13,7 +13,7 @@ pub fn auth_token(password: &str) -> [u8; 32] {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::other( msg.to_string())
+    io::Error::other(msg.to_string())
 }
 
 pub struct ClientSession {
@@ -46,11 +46,7 @@ where
 
     eprintln!("anytls-client: sending settings");
     writer_tx
-        .send(Frame::with_data(
-            CMD_SETTINGS,
-            0,
-            settings.into_bytes(),
-        ))
+        .send(Frame::with_data(CMD_SETTINGS, 0, settings.into_bytes()))
         .await
         .map_err(|_| io_err("anytls: session closed"))?;
 

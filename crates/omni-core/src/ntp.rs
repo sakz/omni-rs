@@ -41,7 +41,11 @@ pub fn query(server: &str, timeout: Duration) -> std::io::Result<NtpResult> {
         .next()
         .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "ntp: resolve failed"))?;
 
-    let bind_local = if resolved.is_ipv6() { "[::]:0" } else { "0.0.0.0:0" };
+    let bind_local = if resolved.is_ipv6() {
+        "[::]:0"
+    } else {
+        "0.0.0.0:0"
+    };
     let sock = UdpSocket::bind(bind_local)?;
     sock.connect(resolved)?;
 
