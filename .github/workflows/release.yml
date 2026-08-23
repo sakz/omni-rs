@@ -3,7 +3,6 @@ name: Release
 on:
   push:
     tags: ["v*"]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,95 +11,57 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-linux-amd64:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: linux-amd64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: macos-arm64
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        targets: x86_64-unknown-linux-gnu
-      - uses: Swatinem/rust-cache@v2
-      - name: Build release (io_uring)
-        run: cargo build --release --workspace
-      - name: Package
-        run: |
-          mkdir -p dist
-          cp target/release/omni-rs-bin dist/
-          tar czf omni-rs-${{ github.ref_name }}-linux-amd64.tar.gz -C dist .
-          sha256sum omni-rs-*.tar.gz > checksums.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-amd64
-          path: omni-rs-*.tar.gz
 
-  build-linux-arm64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
-        targets: aarch64-unknown-linux-gnu
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@cross
-      - name: Build release (cross)
-        run: cross build --release --workspace --target aarch64-unknown-linux-gnu
-      - name: Package
-        run: |
-          mkdir -p dist
-          cp target/aarch64-unknown-linux-gnu/release/omni-rs-bin dist/
-          tar czf omni-rs-${{ github.ref_name }}-linux-arm64.tar.gz -C dist .
-      - uses: actions/upload-artifact@v4
         with:
-          name: linux-arm64
-          path: omni-rs-*.tar.gz
+          targets: ${{ matrix.target }}
 
-  build-macos-arm64:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        targets: aarch64-apple-darwin
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
       - name: Build release
-        run: cargo build --release --workspace
-      - name: Package
-        run: |
-          mkdir -p dist
-          cp target/release/omni-rs-bin dist/
-          tar czf omni-rs-${{ github.ref_name }}-macos-arm64.tar.gz -C dist .
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos-arm64
-          path: omni-rs-*.tar.gz
+        run: cargo build --release --workspace --target ${{ matrix.target }}
 
-  build-macos-amd64:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        targets: x86_64-apple-darwin
-      - uses: Swatinem/rust-cache@v2
-      - name: Build release
-        run: cargo build --release --workspace --target x86_64-apple-darwin
-      - name: Package
+      - name: Package (Unix)
+        shell: bash
         run: |
-          mkdir -p dist
-          cp target/x86_64-apple-darwin/release/omni-rs-bin dist/
-          tar czf omni-rs-${{ github.ref_name }}-macos-amd64.tar.gz -C dist .
+          BIN="target/${{ matrix.target }}/release/omni-rs-bin"
+          [ -f "$BIN" ] || BIN="target/release/omni-rs-bin"
+          cp "$BIN" .
+          tar czf "omni-rs-${{ github.ref_name }}-${{ matrix.artifact }}.tar.gz" omni-rs-bin
+
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-amd64
+          name: ${{ matrix.artifact }}
           path: omni-rs-*.tar.gz
 
   release:
-    needs: [build-linux-amd64, build-linux-arm64, build-macos-arm64, build-macos-amd64]
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
+
       - name: Generate checksums
         run: sha256sum omni-rs-*.tar.gz > checksums.txt
-      - uses: softprops/action-gh-release@v1
+
+      - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
