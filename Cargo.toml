@@ -1,4 +1,126 @@
-[package]
-name = "omni-rs"
+[workspace]
+resolver = "2"
+members = [
+    "apps/omni-cli",
+    "crates/omni-log",
+    "crates/omni-config",
+    "crates/omni-domain",
+    "crates/omni-limiter",
+    "crates/omni-mux",
+    "crates/omni-proto",
+    "crates/omni-transport",
+    "crates/omni-panel",
+    "crates/omni-core",
+]
+
+[workspace.package]
 version = "0.1.5"
 edition = "2021"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+panic = "unwind"
+
+[workspace.dependencies]
+omni-log = { path = "crates/omni-log" }
+omni-config = { path = "crates/omni-config" }
+omni-domain = { path = "crates/omni-domain" }
+omni-limiter = { path = "crates/omni-limiter" }
+omni-mux = { path = "crates/omni-mux" }
+omni-proto = { path = "crates/omni-proto" }
+omni-transport = { path = "crates/omni-transport" }
+omni-panel = { path = "crates/omni-panel" }
+omni-core = { path = "crates/omni-core" }
+
+tokio = { version = "1.50", features = ["full"] }
+futures = "0.3.32"
+futures-util = "0.3.32"
+bytes = "1.11"
+pin-project-lite = "0.2"
+once_cell = "1.21"
+parking_lot = "0.12"
+dashmap = "6.1"
+lru = "0.12"
+slab = "0.4"
+crossbeam-channel = "0.5"
+flume = "0.11"
+num_cpus = "1.17"
+socket2 = "0.5"
+memchr = "2.8"
+regex = "1.12"
+rand = "0.8.5"
+hex = "0.4"
+base64 = "0.22"
+url = "2.5.8"
+idna = "1.1"
+percent-encoding = "2.3"
+chrono = "0.4.44"
+time = "0.3.47"
+humantime = "2.3"
+anyhow = "1.0.102"
+
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+toml = "0.8"
+
+tracing = "0.1"
+tracing-core = "0.1.36"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "fmt", "registry", "ansi", "json"] }
+tracing-appender = "0.2.4"
+
+clap = { version = "4.6", features = ["derive"] }
+
+hickory-resolver = { version = "0.25.2", default-features = false, features = ["tokio"] }
+
+h2 = "0.4"
+http = "1.4"
+httparse = "1.10.1"
+hyper = { version = "1.8.1", features = ["full"] }
+hyper-util = { version = "0.1.20", features = ["full"] }
+
+aes = "0.8.4"
+aes-gcm = "0.10"
+chacha20poly1305 = "0.10"
+blake3 = "1.8.3"
+cipher = "0.4.4"
+sha2 = "0.10.9"
+hmac = "0.12"
+
+shadowsocks-crypto = "0.6.2"
+smux = "0.2"
+yamux = "0.13.10"
+tokio-util = { version = "0.7", features = ["compat"] }
+
+moka = "0.12.14"
+sysinfo = "0.33"
+rayon = "1.11"
+fastbloom = "0.14"
+seahash = "4.1.0"
+rkyv = "0.7.46"
+
+rcgen = "0.13.2"
+x509-parser = "0.16"
+pem = "3.0.6"
+instant-acme = { version = "0.8.5", default-features = false, features = ["ring"] }
+
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+rustls-pki-types = "1.14"
+rustls-pemfile = "2"
+webpki-roots = "0.26"
+tokio-rustls = { version = "0.26.4", default-features = false, features = ["ring", "tls12"] }
+
+tokio-tungstenite = { version = "0.24", default-features = false, features = ["rustls-tls-webpki-roots"] }
+tungstenite = "0.24"
+
+quinn = { version = "0.11", default-features = false, features = ["runtime-tokio", "rustls", "ring"] }
+h3 = "0.0.8"
+h3-quinn = "0.0.10"
+
+manydns = "1.3.0"
+
+mimalloc = "0.1"
+
+[workspace.metadata.recovered]
+source = "binary analysis of omni-rs-bin 0.1.5"
+spec = "docs/recovered/SPEC.md"
