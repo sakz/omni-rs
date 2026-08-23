@@ -14,7 +14,7 @@ pub fn password_hash(password: &str) -> String {
 }
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }
 
 async fn read_n<S>(stream: &mut S, n: usize) -> std::io::Result<Vec<u8>>
@@ -127,6 +127,7 @@ pub mod udp_frame {
         }
 
         pub fn next_packet(&mut self) -> Option<std::io::Result<(Socks5Addr, Bytes)>> {
+            #[allow(clippy::never_loop)]
             loop {
                 if self.buf.is_empty() && self.eof {
                     return None;

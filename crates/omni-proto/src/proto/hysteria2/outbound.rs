@@ -24,7 +24,7 @@ pub struct Hysteria2Conn {
 }
 
 fn io_err(e: impl std::fmt::Display) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("hysteria2: {}", e))
+    io::Error::other( format!("hysteria2: {}", e))
 }
 
 async fn h3_auth(

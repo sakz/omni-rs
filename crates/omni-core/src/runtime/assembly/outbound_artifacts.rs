@@ -1072,6 +1072,12 @@ pub struct RouterBuilder {
     connectors: HashMap<String, Arc<dyn OutboundConnector>>,
 }
 
+impl Default for RouterBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RouterBuilder {
     pub fn new() -> Self {
         Self {

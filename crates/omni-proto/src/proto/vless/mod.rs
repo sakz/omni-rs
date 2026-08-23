@@ -16,7 +16,7 @@ pub const ATYP_DOMAIN: u8 = 0x02;
 pub const ATYP_V6: u8 = 0x03;
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }
 
 pub fn encode_request(uuid_bytes: &[u8; 16], cmd: u8, target: &ProxyTarget, addons: &[u8]) -> Vec<u8> {
@@ -197,6 +197,7 @@ pub mod udp_frame {
         }
 
         pub fn next_packet(&mut self) -> Option<std::io::Result<(ProxyTarget, Bytes)>> {
+            #[allow(clippy::never_loop)]
             loop {
                 if self.buf.len() < 3 {
                     if self.eof {

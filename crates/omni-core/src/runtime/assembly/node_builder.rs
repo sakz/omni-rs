@@ -126,7 +126,7 @@ pub fn build_node_plans(wire: &RuntimeConfigWire) -> Result<Vec<NodePlan>, Strin
             "socks" | "socks5" => InboundProto::Socks(Default::default()),
             "trojan" => {
                 let pass = str_field(&node.protocol.fields, "password")
-                    .ok_or_else(|| format!("trojan inbound requires a non-empty 'password'"))?;
+                    .ok_or_else(|| "trojan inbound requires a non-empty 'password'".to_string())?;
                 InboundProto::Trojan(omni_proto::proto::trojan::password_hash(&pass))
             }
             "shadowsocks" | "ss" => {
@@ -324,5 +324,5 @@ impl Default for CryptoShim {
 }
 
 pub fn io_err_pub(msg: &str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg.to_string())
+    std::io::Error::other( msg.to_string())
 }

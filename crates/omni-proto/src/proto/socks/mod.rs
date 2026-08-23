@@ -161,8 +161,7 @@ pub mod client {
         stream.write_all(&req).await?;
         let head = socks5::read_exact(stream, 4).await?;
         if head[1] != socks5::REP_SUCCEEDED {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            return Err(std::io::Error::other(
                 format!("socks5: connect refused rep=0x{:02x}", head[1]),
             ));
         }

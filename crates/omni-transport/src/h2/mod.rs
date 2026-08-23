@@ -11,7 +11,7 @@ use std::task::{Context, Poll};
 use tokio::io::{AsyncRead, AsyncWrite};
 
 pub fn ioerr(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("h2: {}", msg))
+    io::Error::other( format!("h2: {}", msg))
 }
 
 pub struct H2Stream {

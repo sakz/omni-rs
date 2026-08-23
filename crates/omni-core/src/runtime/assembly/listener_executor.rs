@@ -190,8 +190,7 @@ async fn handle_stream(
     tracing::debug!(target: "internal.pipeline", "conn accepted inbound={} peer={}", plan.tag, peer);
 
     if matches!(plan.proto, InboundProto::Anytls { .. }) && !matches!(plan.wrap, WrapTransport::None) {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        return Err(std::io::Error::other(
             "anytls requires bare TLS transport",
         ));
     }
@@ -223,10 +222,9 @@ async fn handle_stream(
             };
             let (target, duplex) =
                 omni_proto::proto::mieru::inbound::accept_session(stream, &cfg).await?;
-            return run_tcp_route(shared, duplex, target, Vec::new(), None).await;
+            run_tcp_route(shared, duplex, target, Vec::new(), None).await
         }
-        InboundProto::Naive => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        InboundProto::Naive => Err(std::io::Error::other(
             "naive handled by dedicated CONNECT path",
         )),
         InboundProto::Anytls { password } => {
@@ -290,8 +288,7 @@ async fn handle_stream(
             run_tcp_route(shared, duplex, acc.target, Vec::new(), None).await
         }
         InboundProto::Hysteria2 { .. } => {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Err(std::io::Error::other(
                 "hysteria2 inbound must run on the QUIC listener path",
             ))
         }
@@ -474,20 +471,16 @@ pub(crate) async fn run_proto_pipeline(
             let duplex = crate::runtime::assembly::outbound_artifacts::vmess_duplex(acc.reader, acc.writer);
             run_tcp_route(shared, duplex, acc.target, Vec::new(), None).await
         }
-        InboundProto::Hysteria2 { .. } => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        InboundProto::Hysteria2 { .. } => Err(std::io::Error::other(
             "hysteria2 runs on the QUIC path only",
         )),
-        InboundProto::Anytls { .. } => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        InboundProto::Anytls { .. } => Err(std::io::Error::other(
             "anytls handled by dedicated session path",
         )),
-        InboundProto::Mieru { .. } => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        InboundProto::Mieru { .. } => Err(std::io::Error::other(
             "mieru handled by dedicated session path",
         )),
-        InboundProto::Naive => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        InboundProto::Naive => Err(std::io::Error::other(
             "naive handled by dedicated CONNECT path",
         )),
     };

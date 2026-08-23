@@ -224,7 +224,7 @@ where
     wh.write_all(&enc_payload).await?;
     tracing::debug!(target: "internal.pipeline", "vmess inbound resp header flushed");
 
-    let reader = ChunkReader::new(rh, rkeys, security.clone(), masking, global_padding);
+    let reader = ChunkReader::new(rh, rkeys, security, masking, global_padding);
     let writer = ChunkWriter::new(wh, wkeys, security, masking, global_padding);
 
     Ok(AcceptedVm {
@@ -235,5 +235,5 @@ where
 }
 
 fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }

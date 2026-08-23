@@ -28,7 +28,7 @@ fn security_byte(s: &str) -> io::Result<u8> {
 }
 
 fn io_err(msg: String) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }
 
 pub type VmessConn<S> = (
@@ -135,7 +135,7 @@ where
     };
 
     let (rh, wh) = tokio::io::split(underlay);
-    let reader = ChunkReader::new(rh, resp_keys.clone(), chunk_sec.clone(), masking, padding);
+    let reader = ChunkReader::new(rh, resp_keys.clone(), chunk_sec, masking, padding);
     let writer = ChunkWriter::new(wh, req_keys, chunk_sec, masking, padding);
     Ok((reader, writer))
 }

@@ -33,7 +33,7 @@ pub fn cmd_key(uuid_bytes: &[u8; 16]) -> [u8; 16] {
 }
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }
 
 pub fn encode_request_command(

@@ -30,10 +30,10 @@ fn normalize_dns_addr(s: &str) -> Result<SocketAddr, String> {
     let s = s.trim_start_matches("udp://").trim_start_matches("tcp://");
     if let Some(rest) = s.strip_prefix("https://") {
         let host = rest.split('/').next().unwrap_or(rest);
-        return Ok(format!("{}:443", host).parse().map_err(|e| format!("{}", e))?);
+        return format!("{}:443", host).parse().map_err(|e| format!("{}", e));
     }
     if let Some(rest) = s.strip_prefix("tls://") {
-        return Ok(format!("{}:853", rest).parse().map_err(|e| format!("{}", e))?);
+        return format!("{}:853", rest).parse().map_err(|e| format!("{}", e));
     }
     if !s.contains(':') {
         return format!("{}:53", s).parse().map_err(|e| format!("{}", e));
@@ -62,7 +62,7 @@ impl omni_domain::ports::resolver::Resolver for HickoryDns {
                 .0
                 .lookup_ip(host)
                 .await
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("dns: {}", e)))?;
+                .map_err(|e| std::io::Error::other( format!("dns: {}", e)))?;
             let addrs: Vec<SocketAddr> = resp
                 .iter()
                 .map(|ip| SocketAddr::new(ip, port))
@@ -81,7 +81,7 @@ impl omni_domain::ports::resolver::Resolver for SystemResolver {
         Box::pin(async move {
             let mut iter = tokio::net::lookup_host((host.as_str(), port))
                 .await
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("dns: {}", e)))?;
+                .map_err(|e| std::io::Error::other( format!("dns: {}", e)))?;
             let addrs: Vec<SocketAddr> = iter.by_ref().collect();
             Ok(ResolvedAddrs { addrs })
         })

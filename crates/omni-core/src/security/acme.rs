@@ -5,7 +5,7 @@ use std::io;
 
 
 fn ioerr(msg: String) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, msg)
+    io::Error::other( msg)
 }
 
 pub fn key_authorization(token: &str, thumbprint_b64: &str) -> String {

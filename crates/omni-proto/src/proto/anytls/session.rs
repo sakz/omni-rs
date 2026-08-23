@@ -214,16 +214,13 @@ where
                     }
                     CMD_PSH => {
                         let tx = registry.lock().await.get(&frame.sid).cloned();
-                        match tx {
-                            Some(tx) => {
-                                let msg = if frame.data.is_empty() {
-                                    StreamMsg::Eof
-                                } else {
-                                    StreamMsg::Data(frame.data)
-                                };
-                                let _ = tx.send(msg).await;
-                            }
-                            None => {}
+                        if let Some(tx) = tx {
+                            let msg = if frame.data.is_empty() {
+                                StreamMsg::Eof
+                            } else {
+                                StreamMsg::Data(frame.data)
+                            };
+                            let _ = tx.send(msg).await;
                         }
                     }
                     CMD_FIN => {

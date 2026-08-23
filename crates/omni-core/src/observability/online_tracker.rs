@@ -44,6 +44,6 @@ impl OnlineTracker {
     }
 
     pub fn online_total(&self) -> u64 {
-        self.total.load(Ordering::Relaxed).max(0) as u64
+        self.total.load(Ordering::Relaxed)
     }
 }

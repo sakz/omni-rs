@@ -14,7 +14,7 @@ pub struct ServerConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, msg.to_string())
+    io::Error::other( msg.to_string())
 }
 
 pub type RouteCallback = Arc<
@@ -43,7 +43,7 @@ where
 }
 
 fn auth_digest(password: &str) -> [u8; 32] {
-    crypto::sha256_digest(password.as_bytes()).into()
+    crypto::sha256_digest(password.as_bytes())
 }
 
 pub async fn accept_session<S>(
@@ -68,19 +68,16 @@ where
                 let mut buf: Vec<u8> = Vec::with_capacity(280);
             let mut tmp = [0u8; 512];
             loop {
-                match omni_domain::socks5::Socks5Addr::decode(&buf) {
-                    Ok((addr, used)) => {
-                        let target = addr.to_proxy_target();
-                        let leftover = buf[used..].to_vec();
-                        let stream = PrefixedStream {
-                            inner: stream,
-                            prefix: Some(leftover),
-                        };
-                        tracing::debug!(target: "internal.pipeline", "anytls stream target={} sid={}", target, stream.inner.sid);
-                        route(stream, target);
-                        return;
-                    }
-                    Err(_) => {}
+                if let Ok((addr, used)) = omni_domain::socks5::Socks5Addr::decode(&buf) {
+                    let target = addr.to_proxy_target();
+                    let leftover = buf[used..].to_vec();
+                    let stream = PrefixedStream {
+                        inner: stream,
+                        prefix: Some(leftover),
+                    };
+                    tracing::debug!(target: "internal.pipeline", "anytls stream target={} sid={}", target, stream.inner.sid);
+                    route(stream, target);
+                    return;
                 }
                 if buf.len() > 4096 {
                     return;

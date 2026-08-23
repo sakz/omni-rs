@@ -17,7 +17,7 @@ pub struct Hysteria2Listener {
 }
 
 fn io_err(e: impl std::fmt::Display) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("hysteria2: {}", e))
+    io::Error::other( format!("hysteria2: {}", e))
 }
 
 impl Hysteria2Listener {
@@ -110,7 +110,7 @@ impl Hysteria2Listener {
 
                     while req_stream.recv_data().await.ok().flatten().is_some() {}
 
-                    if auth == "" {
+                    if auth.is_empty() {
                         continue;
                     }
 
@@ -219,7 +219,7 @@ impl AsyncWrite for HysteriaStream {
         match Pin::new(&mut self.send).poll_write(cx, buf) {
             std::task::Poll::Ready(Ok(n)) => std::task::Poll::Ready(Ok(n)),
             std::task::Poll::Ready(Err(e)) => {
-                std::task::Poll::Ready(Err(io::Error::new(io::ErrorKind::Other, e)))
+                std::task::Poll::Ready(Err(io::Error::other( e)))
             }
             std::task::Poll::Pending => std::task::Poll::Pending,
         }

@@ -18,7 +18,7 @@ pub struct MieruOutboundConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("mieru: {}", msg))
+    io::Error::other( format!("mieru: {}", msg))
 }
 
 fn epoch_minute() -> u64 {

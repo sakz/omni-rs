@@ -110,11 +110,8 @@ fn validate_outbound(ob: &omni_config::wire::OutboundSpecWire) -> Result<(), Str
 }
 
 fn validate_node(node: &omni_config::wire::NodeConfigWire) -> Result<(), String> {
-    match node.r#type.as_str() {
-        "" => return Err("protocol cannot be empty".to_string()),
-        _ => {}
-    }
-    if node.mux_enabled == false {
+    if node.r#type.as_str() == "" { return Err("protocol cannot be empty".to_string()) }
+    if !node.mux_enabled {
         if let Some(mux) = &node.mux {
             if mux.kind.is_some() {
                 return Err("mux is disabled but a mux kind is configured".to_string());
@@ -173,7 +170,7 @@ fn validate_tls(tls: &omni_config::wire::TlsInboundSpecWire) -> Result<(), Strin
     }
     if let Some(reality) = &tls.reality {
         for sid in &reality.short_ids {
-            if hex_decode_check(sid) == false {
+            if !hex_decode_check(sid) {
                 return Err(format!("reality.short_ids entry '{}' is not valid hex", sid));
             }
         }
@@ -182,5 +179,5 @@ fn validate_tls(tls: &omni_config::wire::TlsInboundSpecWire) -> Result<(), Strin
 }
 
 fn hex_decode_check(s: &str) -> bool {
-    s.len() % 2 == 0 && s.chars().all(|c| c.is_ascii_hexdigit())
+    s.len().is_multiple_of(2) && s.chars().all(|c| c.is_ascii_hexdigit())
 }

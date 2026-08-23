@@ -40,19 +40,15 @@ pub mod sha1 {
 
         fn block(&mut self, block: &[u8; 64]) {
             let mut w = [0u32; 80];
-            for i in 0..16 {
-                w[i] = u32::from_be_bytes([
-                    block[i * 4],
-                    block[i * 4 + 1],
-                    block[i * 4 + 2],
-                    block[i * 4 + 3],
-                ]);
+            for (i, chunk) in block.chunks_exact(4).enumerate() {
+                w[i] = u32::from_be_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
             }
             for i in 16..80 {
                 w[i] = (w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16]).rotate_left(1);
             }
             let (mut a, mut b, mut c, mut d, mut e) =
                 (self.h[0], self.h[1], self.h[2], self.h[3], self.h[4]);
+            #[allow(clippy::needless_range_loop)]
             for i in 0..80 {
                 let (f, k) = match i / 20 {
                     0 => ((b & c) | (!b & d), 0x5A827999u32),
@@ -109,7 +105,7 @@ fn accept_key(key: &str) -> String {
 }
 
 fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }
 
 #[derive(Debug, Clone, Default)]
@@ -254,7 +250,7 @@ where
 }
 
 fn ws_err(e: tokio_tungstenite::tungstenite::Error) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, format!("ws: {}", e))
+    std::io::Error::other( format!("ws: {}", e))
 }
 
 pub struct WsProxyStream<S> {
@@ -299,8 +295,7 @@ where
                     Message::Ping(_) | Message::Pong(_) | Message::Frame(_) => {}
                 },
                 Poll::Ready(Some(Err(e))) => {
-                    return Poll::Ready(Err(std::io::Error::new(
-                        std::io::ErrorKind::Other,
+                    return Poll::Ready(Err(std::io::Error::other(
                         format!("ws: {}", e),
                     )))
                 }
@@ -354,8 +349,7 @@ where
         use futures_util::Sink;
         match Pin::new(&mut self.inner).poll_close(cx) {
             Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
-            Poll::Ready(Err(e)) => Poll::Ready(Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            Poll::Ready(Err(e)) => Poll::Ready(Err(std::io::Error::other(
                 format!("ws: {}", e),
             ))),
             Poll::Pending => Poll::Pending,
@@ -364,8 +358,7 @@ where
 }
 
 fn ws_poll_err(e: tungstenite::Error) -> Poll<std::io::Result<()>> {
-    Poll::Ready(Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
+    Poll::Ready(Err(std::io::Error::other(
         format!("ws: {}", e),
     )))
 }

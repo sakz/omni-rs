@@ -23,16 +23,16 @@ pub fn resolve_tls_pems(
     spec: &TlsSpecView<'_>,
     email_present: bool,
 ) -> Result<ServerCertMaterial, String> {
-    match spec.cert_mode.as_deref() {
+    match spec.cert_mode {
         Some("file") => {
             let cert_file = spec.cert_file.unwrap_or_default();
             let key_file = spec.key_file.unwrap_or_default();
             if cert_file.is_empty() || key_file.is_empty() {
                 return Err("cert_mode=file requires cert_file and key_file paths".to_string());
             }
-            let cert = std::fs::read(&cert_file)
+            let cert = std::fs::read(cert_file)
                 .map_err(|e| format!("cert: failed to read {}: {}", cert_file, e))?;
-            let key = std::fs::read(&key_file)
+            let key = std::fs::read(key_file)
                 .map_err(|e| format!("cert: failed to read {}: {}", key_file, e))?;
             Ok(ServerCertMaterial { cert_pem: cert, key_pem: key })
         }
@@ -55,7 +55,7 @@ pub fn resolve_tls_pems(
             if domain.is_empty() {
                 return Err("cert_mode=self requires cert_domain".to_string());
             }
-            generate_self_signed(&domain).map_err(|e| format!("cert.generate: {}", e))
+            generate_self_signed(domain).map_err(|e| format!("cert.generate: {}", e))
         }
         Some("acme") => {
             if !email_present {

@@ -20,9 +20,11 @@ impl Format {
 }
 
 pub fn init(format: Format) -> bool {
-    INIT.get().is_some().then_some(false).unwrap_or_else(|| {
+    if INIT.get().is_some() {
+        false
+    } else {
         let _ = INIT.set(());
         subscriber::init(format);
         true
-    })
+    }
 }

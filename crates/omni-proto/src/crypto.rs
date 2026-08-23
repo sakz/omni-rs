@@ -145,7 +145,7 @@ pub fn hex_encode(data: &[u8]) -> String {
 }
 
 pub fn hex_decode(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 || !s.chars().all(|c| c.is_ascii_hexdigit()) {
+    if !s.len().is_multiple_of(2) || !s.chars().all(|c| c.is_ascii_hexdigit()) {
         return None;
     }
     (0..s.len() / 2)

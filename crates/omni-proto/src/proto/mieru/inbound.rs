@@ -15,7 +15,7 @@ pub struct MieruInboundConfig {
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("mieru: {}", msg))
+    io::Error::other( format!("mieru: {}", msg))
 }
 
 fn epoch_minute() -> u64 {
@@ -94,9 +94,9 @@ where
 
     let client_nonce: [u8; 24] = seg_buf[..NONCE_SIZE].try_into().unwrap();
     let meta_plain = {
-        let c = crypto::open(&key, &client_nonce, &seg_buf[NONCE_SIZE..NONCE_SIZE + METADATA_SIZE + TAG_SIZE])
-            .ok_or_else(|| io_err("mieru: authentication failed"))?;
-        c
+        
+        crypto::open(&key, &client_nonce, &seg_buf[NONCE_SIZE..NONCE_SIZE + METADATA_SIZE + TAG_SIZE])
+            .ok_or_else(|| io_err("mieru: authentication failed"))?
     };
     let md = parse_metadata(meta_plain.as_slice().try_into().unwrap());
 

@@ -250,7 +250,7 @@ pub async fn write_reply<S: AsyncWrite + Unpin>(
 }
 
 pub fn io_err(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+std::io::Error::other(msg)
 }
 
 #[cfg(test)]

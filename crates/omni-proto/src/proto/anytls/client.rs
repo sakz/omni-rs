@@ -8,12 +8,12 @@ use std::sync::Arc;
 use tokio::sync::{mpsc, Mutex};
 
 pub fn auth_token(password: &str) -> [u8; 32] {
-    let out: [u8; 32] = crypto::sha256_digest(password.as_bytes()).into();
+    let out: [u8; 32] = crypto::sha256_digest(password.as_bytes());
     out
 }
 
 fn io_err(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, msg.to_string())
+    io::Error::other( msg.to_string())
 }
 
 pub struct ClientSession {

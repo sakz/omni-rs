@@ -30,7 +30,7 @@ impl MuxKind {
 }
 
 fn ioerr(msg: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("mux: {}", msg))
+    io::Error::other( format!("mux: {}", msg))
 }
 
 struct TokioToFut<T>(T);

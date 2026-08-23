@@ -48,5 +48,5 @@ fn normalize(p: &str) -> String {
 }
 
 pub fn ioerr(msg: &'static str) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::Other, msg)
+    std::io::Error::other( msg)
 }

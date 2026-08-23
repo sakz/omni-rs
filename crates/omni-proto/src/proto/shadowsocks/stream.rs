@@ -132,7 +132,7 @@ impl<W: tokio::io::AsyncWrite + Unpin> AeadStreamWriter<W> {
         for piece in data.chunks(super::MAX_PAYLOAD) {
             let mut hdr = (piece.len() as u16).to_be_bytes().to_vec();
             let ltag = self.seal(&mut hdr).ok_or_else(|| {
-                std::io::Error::new(std::io::ErrorKind::Other, "shadowsocks: encrypt failed")
+                std::io::Error::other( "shadowsocks: encrypt failed")
             })?;
             let mut payload = piece.to_vec();
             let ptag = self.seal(&mut payload).unwrap();
